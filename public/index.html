@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pediatric Echocardiogram</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="p-4">
+
+<div class="container">
+    <h2 class="text-center mb-3">Pediatric Echocardiogram</h2>
+    <div class="text-end mb-3" id="currentDate"></div>
+
+    <form id="echoForm">
+        <!-- Patient Info -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label for="name" class="form-label">Name</label>
+                <input type="text" class="form-control" id="name" required>
+            </div>
+            <div class="col-md-3">
+                <label for="patientId" class="form-label">Patient ID</label>
+                <input type="text" class="form-control" id="patientId" placeholder="Enter Patient ID" required>
+            </div>
+            <div class="col-md-3">
+                <label for="dob" class="form-label">Date of Birth</label>
+                <input type="date" class="form-control" id="dob">
+            </div>
+            <div class="col-md-3">
+                <label for="age" class="form-label">Age</label>
+                <input type="text" class="form-control" id="age" readonly placeholder="Auto-calculated">
+            </div>
+        </div>
+
+        <!-- Phone & Location -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label for="phone1" class="form-label">Phone 1</label>
+                <input type="tel" class="form-control" id="phone1" placeholder="Enter phone number">
+            </div>
+            <div class="col-md-3">
+                <label for="phone2" class="form-label">Phone 2</label>
+                <input type="tel" class="form-control" id="phone2" placeholder="Enter alternate number">
+            </div>
+            <div class="col-md-6">
+                <label for="location" class="form-label">Location</label>
+                <select class="form-control" id="location">
+                    <option>Arthi Hospital, Kumbakonam</option>
+                    <option>Senthil Nursing Home, Puthukottai</option>
+                    <option>Hridya Cardiac Care, Puthukottai</option>
+                    <option>Thulir Hospital, Tiruvarur</option>
+                    <option>Perambalur Cardiac Centre, Perambalur</option>
+                    <option>Star Kids Hospital, Dindugul</option>
+                    <option>Pugazhini Hospital, Trichy</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Sex, Weight, Diagnosis -->
+        <div class="row mb-3">
+            <div class="col-md-3">
+                <label for="sex" class="form-label">Sex</label>
+                <select class="form-control" id="sex">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="weight" class="form-label">Weight (kg)</label>
+                <input type="number" class="form-control" id="weight" placeholder="Enter weight">
+            </div>
+            <div class="col-md-6">
+                <label for="diagnosis" class="form-label">Diagnosis</label>
+                <select class="form-control" id="diagnosis">
+                    <option>Structurally Normal Heart and Normal Ventricular Function</option>
+                    <option>Others</option>
+                </select>
+                <textarea class="form-control mt-2 d-none" id="diagnosisOther" placeholder="Enter Diagnosis"></textarea>
+            </div>
+        </div>
+
+        <h5 class="mt-4">Segmental Anatomy</h5>
+
+        <div class="mb-3">
+            <label for="situsLoop" class="form-label">Situs and Looping</label>
+            <select class="form-control" id="situsLoop">
+                <option>s,d,s</option>
+                <option>s,d,d</option>
+                <option>i,l,I</option>
+                <option>i,l,l</option>
+                <option>Others</option>
+            </select>
+            <textarea class="form-control mt-2 d-none" id="situsLoopOther"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="systemicVeins" class="form-label">Systemic Veins</label>
+            <select class="form-control" id="systemicVeins">
+                <option>Normal</option>
+                <option>Others</option>
+            </select>
+            <textarea class="form-control mt-2 d-none" id="systemicVeinsOther"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="pulmonaryVeins" class="form-label">Pulmonary Veins</label>
+            <select class="form-control" id="pulmonaryVeins">
+                <option>Normal</option>
+                <option>Others</option>
+            </select>
+            <textarea class="form-control mt-2 d-none" id="pulmonaryVeinsOther"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="atria" class="form-label">Atria</label>
+            <select class="form-control" id="atria">
+                <option>Normal</option>
+                <option>Others</option>
+            </select>
+            <textarea class="form-control mt-2 d-none" id="atriaOther"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="atrialSeptum" class="form-label">Atrial Septum</label>
+            <select class="form-control" id="atrialSeptum">
+                <option>PFO with L-R shunt</option>
+                <option>Intact</option>
+                <option>Others</option>
+            </select>
+            <textarea class="form-control mt-2 d-none" id="atrialSeptumOther"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="avValves" class="form-label">AV Valves</label>
+            <select class="form-control" id="avValves">
+                <option>Normal</option>
+                <option>Others</option>
+            </select>
+            <textarea class="form-control mt-2 d-none" id="avValvesOther"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="ventricles" class="form-label">Ventricles</label>
+            <select class="form-control" id="ventricles">
+                <option>Normal</option>
+                <option>Others</option>
+            </select>
+            <textarea class="form-control mt-2 d-none" id="ventriclesOther"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="ventricularSeptum" class="form-label">Ventricular Septum</label>
+            <select class="form-control" id="ventricularSeptum">
+                <option>Intact</option>
+                <option>Others</option>
+            </select>
+            <textarea class="form-control mt-2 d-none" id="ventricularSeptumOther"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="outflowTracts" class="form-label">Outflow Tracts including Semilunar Valves</label>
+            <select class="form-control" id="outflowTracts">
+                <option>NRGA. The Aortic valve is trileaflet and competent. The coronary origins are normal.</option>
+                <option>Others</option>
+            </select>
+            <textarea class="form-control mt-2 d-none" id="outflowTractsOther"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="pulmonaryArteries" class="form-label">Pulmonary Arteries</label>
+            <select class="form-control" id="pulmonaryArteries">
+                <option>Confluent</option>
+                <option>Others</option>
+            </select>
+            <textarea class="form-control mt-2 d-none" id="pulmonaryArteriesOther"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="aorticArch" class="form-label">Aortic Arch</label>
+            <select class="form-control" id="aorticArch">
+                <option>Left Arch with normal branching pattern. Nk CoA</option>
+                <option>Others</option>
+            </select>
+            <textarea class="form-control mt-2 d-none" id="aorticArchOther"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="othersField" class="form-label">Others</label>
+            <select class="form-control" id="othersField">
+                <option>No Pericardial Effusion</option>
+                <option>Others</option>
+            </select>
+            <textarea class="form-control mt-2 d-none" id="othersFieldOther"></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="impression" class="form-label">Impression</label>
+            <select class="form-control" id="impression">
+                <option>Reassured</option>
+                <option>Others</option>
+            </select>
+            <textarea class="form-control mt-2 d-none" id="impressionOther"></textarea>
+        </div>
+
+      <div class="col-md-4">
+  <label for="review_date" class="form-label">Review Date</label>
+  <input type="date" class="form-control" id="review_date">
+</div>
+
+
+
+        <div class="text-end mb-3">Dr. Mani Ram Krishna</div>
+        <p>Kindly note that this is a bedside evaluation performed under sub-optimal conditions...</p>
+
+        <div class="d-flex gap-2 mb-4">
+            <button type="submit" class="btn btn-primary">Submit</button>
+            <button type="button" class="btn btn-success" id="downloadReport">Download Report</button>
+        </div>
+    </form>
+
+    <hr>
+
+    <div class="mb-3">
+        <input type="text" id="searchId" placeholder="Patient ID" class="form-control mb-2">
+        <button id="searchBtn" class="btn btn-info">Search</button>
+    </div>
+    <pre id="searchResult" class="border p-2"></pre>
+
+    <div class="text-end mt-3">
+        <button class="btn btn-secondary" onclick="window.location.href='records.html'">View Records</button>
+    </div>
+</div>
+
+<script src="js/script.js"></script>
+</body>
+</html>

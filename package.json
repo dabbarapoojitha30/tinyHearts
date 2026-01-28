@@ -1,0 +1,26 @@
+{
+  "name": "pedechon",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "engines": {
+    "node": "18.x"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
+    "express": "^5.2.1",
+    "express-validator": "^7.3.1",
+    "html-pdf": "^3.0.1",
+    "pg": "^8.17.2",
+    "puppeteer": "^24.36.0",
+    "uuid": "^13.0.0"
+  },
+  "description": "",
+  "main": "createTable.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
