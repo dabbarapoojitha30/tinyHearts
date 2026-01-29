@@ -1,10 +1,19 @@
 // ------------------- LIVE DATE -------------------
-document.getElementById('currentDate').innerText = new Date().toLocaleDateString();
+document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-GB');
+
+// ------------------- DATE FORMAT -------------------
+function formatDate(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const day = String(d.getDate()).padStart(2,'0');
+    const month = String(d.getMonth()+1).padStart(2,'0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+}
 
 // ------------------- AUTO-CALCULATE AGE -------------------
 const dobInput = document.getElementById('dob');
 const ageInput = document.getElementById('age');
-const patientIdInput = document.getElementById('patientId');
 
 dobInput.addEventListener('change', () => {
     const dob = new Date(dobInput.value);
@@ -14,6 +23,7 @@ dobInput.addEventListener('change', () => {
     let years = today.getFullYear() - dob.getFullYear();
     let months = today.getMonth() - dob.getMonth();
     let days = today.getDate() - dob.getDate();
+
     if (days < 0) {
         months--;
         const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
@@ -38,15 +48,17 @@ const othersFields = [
 othersFields.forEach(([selId, taId]) => {
     const sel = document.getElementById(selId);
     const ta = document.getElementById(taId);
-    sel.addEventListener('change', () => {
-        if(sel.value === 'Others') ta.classList.remove('d-none');
-        else { ta.classList.add('d-none'); ta.value = ''; }
-    });
+    if(sel && ta){
+        sel.addEventListener('change', () => {
+            if(sel.value === 'Others') ta.classList.remove('d-none');
+            else { ta.classList.add('d-none'); ta.value = ''; }
+        });
+    }
 });
 
 // ------------------- HELPER FUNCTIONS -------------------
-function camelToSnake(str) {
-    return str.replace(/[A-Z]/g, letter => `_${letter.toLowerCase()}`);
+function camelToSnake(str){
+    return str.replace(/[A-Z]/g, l => `_${l.toLowerCase()}`);
 }
 
 function setSelectOrOther(selId, taId, value){
@@ -69,6 +81,34 @@ function getValue(selId, taId){
     return sel.value;
 }
 
+// ------------------- AUTO-GENERATE PATIENT ID -------------------
+const patientIdInput = document.getElementById('patientId');
+const locationSelect = document.getElementById('location');
+const LOCATION_CODES = {
+    "Arthi Hospital, Kumbakonam":"KUM",
+    "Senthil Nursing Home, Puthukottai":"PUTS",
+    "Hridya Cardiac Care, Puthukottai":"PUTH",
+    "Thulir Hospital, Tiruvarur":"TIR",
+    "Perambalur Cardiac Centre, Perambalur":"PER",
+    "Star Kids Hospital, Dindugul":"DIN",
+    "Pugazhini Hospital, Trichy":"TRI"
+};
+
+locationSelect.addEventListener('change', async () => {
+    const loc = locationSelect.value;
+    const code = LOCATION_CODES[loc];
+    if(!code){ patientIdInput.value = ''; return; }
+
+    try {
+        const res = await fetch(`/generate-patient-id?location=${encodeURIComponent(loc)}`);
+        const data = await res.json();
+        patientIdInput.value = data.patient_id || code + "1";
+    } catch(err){
+        console.error("Failed to generate patient ID:", err);
+        patientIdInput.value = code + "1";
+    }
+});
+
 // ------------------- LOAD PATIENT FOR EDIT -------------------
 const params = new URLSearchParams(window.location.search);
 const updateId = params.get("update");
@@ -79,9 +119,10 @@ if(updateId){
         .then(data => {
             patientIdInput.value = data.patient_id;
             patientIdInput.readOnly = true;
-            document.getElementById('name').value = data.name;
-            dobInput.value = data.dob || '';
+            document.getElementById('name').value = data.name || '';
+            dobInput.value = data.dob ? data.dob.split('T')[0] : '';
             ageInput.value = data.age || '';
+            document.getElementById('review_date').value = data.review_date ? data.review_date.split('T')[0] : '';
             document.getElementById('sex').value = data.sex || 'Male';
             document.getElementById('weight').value = data.weight || '';
             document.getElementById('phone1').value = data.phone1 || '';
@@ -98,17 +139,16 @@ form.addEventListener('submit', async e => {
     e.preventDefault();
 
     const payload = {
-        patient_id: patientIdInput.value.trim(),
+        patient_id: patientIdInput.value,
         name: document.getElementById("name").value.trim(),
         age: ageInput.value,
         dob: dobInput.value || null,
+        review_date: document.getElementById("review_date")?.value || null,
         sex: document.getElementById("sex").value,
         weight: parseFloat(document.getElementById("weight").value) || null,
         phone1: document.getElementById("phone1").value || null,
         phone2: document.getElementById("phone2").value || null,
-        location: document.getElementById("location").value || null,
-review_date: document.getElementById("review_date")?.value || null,
-
+        location: locationSelect.value || null
     };
 
     othersFields.forEach(([selId, taId]) => payload[camelToSnake(selId)] = getValue(selId, taId));
@@ -127,8 +167,7 @@ review_date: document.getElementById("review_date")?.value || null,
             headers:{'Content-Type':'application/json'},
             body:JSON.stringify(payload)
         });
-const text = await res.text();
-const result = text ? JSON.parse(text) : {};
+        const result = await res.json();
         if(res.ok){
             alert(updateId ? "Patient updated" : "Patient saved");
             window.location.href = 'records.html';
@@ -145,18 +184,23 @@ document.getElementById("downloadReport").addEventListener("click", async () => 
         name: document.getElementById("name").value.trim(),
         age: ageInput.value,
         dob: dobInput.value || null,
+        review_date: document.getElementById("review_date")?.value || null,
         sex: document.getElementById("sex").value,
         weight: parseFloat(document.getElementById("weight").value) || null,
         phone1: document.getElementById("phone1").value || null,
         phone2: document.getElementById("phone2").value || null,
-        location: document.getElementById("location").value || null
+        location: locationSelect.value || null
     };
     othersFields.forEach(([selId, taId]) => payload[camelToSnake(selId)] = getValue(selId, taId));
 
     if(!payload.name || !payload.patient_id){ alert("Patient ID and Name required"); return; }
 
     try{
-        const res = await fetch("/generate-pdf", { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify(payload)});
+        const res = await fetch("/generate-pdf", {
+            method:"POST",
+            headers:{"Content-Type":"application/json"},
+            body:JSON.stringify(payload)
+        });
         if(!res.ok) throw new Error(res.statusText);
         const blob = await res.blob();
         const url = window.URL.createObjectURL(blob);
@@ -173,7 +217,7 @@ const searchBtn2 = document.getElementById("searchBtn");
 const searchInput2 = document.getElementById("searchId");
 const searchResult2 = document.getElementById("searchResult");
 
-searchBtn2.addEventListener("click", async ()=>{
+searchBtn2.addEventListener("click", async () => {
     const id = searchInput2.value.trim();
     if(!id){ alert("Enter Patient ID"); return; }
     try{
@@ -181,11 +225,14 @@ searchBtn2.addEventListener("click", async ()=>{
         if(res.status === 404){ searchResult2.innerText="Patient not found"; return; }
         if(!res.ok) throw new Error(res.statusText);
         const data = await res.json();
+
         searchResult2.innerText = `
 Patient ID: ${data.patient_id}
 Name: ${data.name}
-Age: ${data.age}
-Sex: ${data.sex}
+DOB: ${formatDate(data.dob)}
+Review Date: ${formatDate(data.review_date)}
+Age: ${data.age || ''}
+Sex: ${data.sex || ''}
 Weight: ${data.weight || ''} kg
 Phone1: ${data.phone1 || ''}
 Phone2: ${data.phone2 || ''}

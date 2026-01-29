@@ -21,8 +21,9 @@
                 <input type="text" class="form-control" id="name" required>
             </div>
             <div class="col-md-3">
-                <label for="patientId" class="form-label">Patient ID</label>
-                <input type="text" class="form-control" id="patientId" placeholder="Enter Patient ID" required>
+                <label>Patient ID</label>
+                <input type="text" id="patientId" class="form-control" readonly>
+
             </div>
             <div class="col-md-3">
                 <label for="dob" class="form-label">Date of Birth</label>
@@ -47,14 +48,15 @@
             <div class="col-md-6">
                 <label for="location" class="form-label">Location</label>
                 <select class="form-control" id="location">
-                    <option>Arthi Hospital, Kumbakonam</option>
-                    <option>Senthil Nursing Home, Puthukottai</option>
-                    <option>Hridya Cardiac Care, Puthukottai</option>
-                    <option>Thulir Hospital, Tiruvarur</option>
-                    <option>Perambalur Cardiac Centre, Perambalur</option>
-                    <option>Star Kids Hospital, Dindugul</option>
-                    <option>Pugazhini Hospital, Trichy</option>
-                </select>
+                 <option data-code="KUM">Arthi Hospital, Kumbakonam</option>
+                 <option data-code="PUTS">Senthil Nursing Home, Puthukottai</option>
+                 <option data-code="PUTH">Hridya Cardiac Care, Puthukottai</option>
+                 <option data-code="TIR">Thulir Hospital, Tiruvarur</option>
+                 <option data-code="PER">Perambalur Cardiac Centre, Perambalur</option>
+                 <option data-code="DIN">Star Kids Hospital, Dindugul</option>
+                <option data-code="TRI">Pugazhini Hospital, Trichy</option>
+               </select>
+
             </div>
         </div>
 

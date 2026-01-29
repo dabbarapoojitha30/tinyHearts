@@ -3,10 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <title>Tiny Hearts Report</title>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 
 <style>
-body { font-family: 'Poppins', sans-serif; background: #f2f5f9; margin:0; padding:0; }
+body { 
+  font-family: 'Times New Roman', serif; 
+  font-style:normal;
+  background: #f2f5f9; 
+  margin:0; 
+  padding:0; 
+}
+
 .page {
   width: 210mm;
   height: 297mm;
@@ -20,7 +26,7 @@ body { font-family: 'Poppins', sans-serif; background: #f2f5f9; margin:0; paddin
 
 .header { display: flex; justify-content: space-between; align-items: flex-start; }
 .header-left h1 { color: #d32f2f; margin:0; font-size:22px; }
-.header-left h2 { margin:2px 0; font-size:14px; color:#3a5964; }
+.header-left h2 { margin:2px 0; font-size:14px; color:#3a5964;font-style: normal; }
 .header-left h4 { margin:1px 0; font-size:11px; }
 .header-right { text-align:center; font-size:12px; }
 .header-right img { max-height:100px; margin-bottom:4px; }
@@ -32,22 +38,31 @@ hr.divider { border:none; border-top:2px solid #1e3a8a; margin:8px 0 10px; }
 
 .section-title { font-weight:600; margin:10px 0 3px; text-decoration:underline; font-size:14px; page-break-inside:avoid; }
 .field { margin-bottom:4px; font-size:13px; page-break-inside:avoid; }
-.field-label { font-weight:500; }
-.field-value { font-weight:400; margin-left:3px; }
+.field-label { font-weight:700; } /* still bold for PDF compatibility */
+.field-value { font-weight:500; margin-left:3px; }
 
 .patient-details { display:flex; justify-content:space-between; flex-wrap:wrap; }
 .patient-left, .patient-right { width:48%; }
+
+.diagnosis-section {
+  text-align: center;
+  font-weight:600;
+  font-size:14px;
+  word-wrap: break-word;
+  
+}
 
 .impression { font-size:14px; line-height:1.4; padding:6px; text-transform:uppercase; }
 
 .review-doctor { display:flex; justify-content:space-between; margin-top:15px; font-size:13px; }
 .review-left { max-width:60%; }
-.review-left p { margin:2px 0; font-style:italic; }
+.review-left p { margin:2px 0;  }
 .doctor-right { text-align:right; }
 .doctor-right h3 { margin:0; font-size:14px; }
-.doctor-right span { font-size:12px; font-style:italic; }
+.doctor-right span { font-size:12px; }
 
-.note-line { margin:5px 0 10px; font-style:italic; font-size:12px; }
+.note-line { margin:5px 0 10px; font-size:12px; }
+.note-proffesion{margin:5px 0 10px; font-size:12px;}
 
 .footer-divider { border-top:2px solid #1e3a8a; margin:10px 0; }
 .footer { text-align:center; font-size:12px; }
@@ -72,7 +87,7 @@ hr.divider { border:none; border-top:2px solid #1e3a8a; margin:8px 0 10px; }
     <div class="header-left">
       <h1>TINY HEARTS</h1>
       <h2>FETAL & PEDIATRIC CARDIAC CLINIC</h2>
-      <h4>Phone: 79044 45293 / 04362 271171</h4>
+      <h4>Phone: 79044 45293 / +91 1112222111</h4>
       <h4>E-mail: tinyheartsthanjavur@gmail.com</h4>
     </div>
     <div class="header-right">
@@ -91,38 +106,38 @@ hr.divider { border:none; border-top:2px solid #1e3a8a; margin:8px 0 10px; }
   <div class="section-title">Patient Details</div>
   <div class="patient-details">
     <div class="patient-left">
-      <div class="field"><span class="field-label">Patient ID:</span><span class="field-value">{{patient_id}}</span></div>
-      <div class="field"><span class="field-label">Patient Name:</span><span class="field-value">{{name}}</span></div>
-      <div class="field"><span class="field-label">Date of Birth:</span><span class="field-value">{{dob}}</span></div>
-      <div class="field"><span class="field-label">Weight (kg):</span><span class="field-value">{{weight}}</span></div>
+      <div class="field"><strong>Patient ID:</strong> <span class="field-value">{{patient_id}}</span></div>
+      <div class="field"><strong>Patient Name:</strong> <span class="field-value">{{name}}</span></div>
+      <div class="field"><strong>Date of Birth:</strong> <span class="field-value">{{dob}}</span></div>
+      <div class="field"><strong>Weight (kg):</strong> <span class="field-value">{{weight}} kg</span></div>
     </div>
     <div class="patient-right">
-      <div class="field"><span class="field-label">Age:</span><span class="field-value">{{age}}</span></div>
-      <div class="field"><span class="field-label">Sex:</span><span class="field-value">{{sex}}</span></div>
-      <div class="field"><span class="field-label">Location:</span><span class="field-value">{{location}}</span></div>
-      <div class="field"><span class="field-label">Phone No.1:</span><span class="field-value">{{phone1}}</span></div>
-      <div class="field"><span class="field-label">Phone No.2:</span><span class="field-value">{{phone2}}</span></div>
+      <div class="field"><strong>Age:</strong> <span class="field-value">{{age}}</span></div>
+      <div class="field"><strong>Sex:</strong> <span class="field-value">{{sex}}</span></div>
+      <div class="field"><strong>Location:</strong> <span class="field-value">{{location}}</span></div>
+      <div class="field"><strong>Phone No.1:</strong> <span class="field-value">{{phone1}}</span></div>
+      <div class="field"><strong>Phone No.2:</strong> <span class="field-value">{{phone2}}</span></div>
     </div>
   </div>
 
   <!-- DIAGNOSIS -->
   <div class="section-title">Diagnosis</div>
-  <div class="diagnosis-section"><span class="field-value">{{diagnosis}}</span></div>
+  <div class="diagnosis-section">{{diagnosis}}</div>
 
   <!-- SEGMENTAL ANATOMY -->
   <div class="section-title">Segmental Anatomy</div>
-  <div class="field"><span class="field-label">Situs & Looping:</span><span class="field-value">{{situs_loop}}</span></div>
-  <div class="field"><span class="field-label">Systemic Veins:</span><span class="field-value">{{systemic_veins}}</span></div>
-  <div class="field"><span class="field-label">Pulmonary Veins:</span><span class="field-value">{{pulmonary_veins}}</span></div>
-  <div class="field"><span class="field-label">Atria:</span><span class="field-value">{{atria}}</span></div>
-  <div class="field"><span class="field-label">Atrial Septum:</span><span class="field-value">{{atrial_septum}}</span></div>
-  <div class="field"><span class="field-label">AV Valves:</span><span class="field-value">{{av_valves}}</span></div>
-  <div class="field"><span class="field-label">Ventricles:</span><span class="field-value">{{ventricles}}</span></div>
-  <div class="field"><span class="field-label">Ventricular Septum:</span><span class="field-value">{{ventricular_septum}}</span></div>
-  <div class="field"><span class="field-label">Outflow Tracts:</span><span class="field-value">{{outflow_tracts}}</span></div>
-  <div class="field"><span class="field-label">Pulmonary Arteries:</span><span class="field-value">{{pulmonary_arteries}}</span></div>
-  <div class="field"><span class="field-label">Aortic Arch:</span><span class="field-value">{{aortic_arch}}</span></div>
-  <div class="field"><span class="field-label">Others:</span><span class="field-value">{{others_field}}</span></div>
+  <div class="field"><strong>Situs & Looping:</strong> <span class="field-value">{{situs_loop}}</span></div>
+  <div class="field"><strong>Systemic Veins:</strong> <span class="field-value">{{systemic_veins}}</span></div>
+  <div class="field"><strong>Pulmonary Veins:</strong> <span class="field-value">{{pulmonary_veins}}</span></div>
+  <div class="field"><strong>Atria:</strong> <span class="field-value">{{atria}}</span></div>
+  <div class="field"><strong>Atrial Septum:</strong> <span class="field-value">{{atrial_septum}}</span></div>
+  <div class="field"><strong>AV Valves:</strong> <span class="field-value">{{av_valves}}</span></div>
+  <div class="field"><strong>Ventricles:</strong> <span class="field-value">{{ventricles}}</span></div>
+  <div class="field"><strong>Ventricular Septum:</strong> <span class="field-value">{{ventricular_septum}}</span></div>
+  <div class="field"><strong>Outflow Tracts:</strong> <span class="field-value">{{outflow_tracts}}</span></div>
+  <div class="field"><strong>Pulmonary Arteries:</strong> <span class="field-value">{{pulmonary_arteries}}</span></div>
+  <div class="field"><strong>Aortic Arch:</strong> <span class="field-value">{{aortic_arch}}</span></div>
+  <div class="field"><strong>Others:</strong> <span class="field-value">{{others_field}}</span></div>
 
   <!-- IMPRESSION -->
   <div class="section-title">IMPRESSION</div>
@@ -133,8 +148,10 @@ hr.divider { border:none; border-top:2px solid #1e3a8a; margin:8px 0 10px; }
     <div class="review-left"><strong>Review Date: {{review_date}}</strong></div>
     <div class="doctor-right">
       <h3>Dr. Mani Ram Krishna</h3>
-      <span>Fetal and Pediatric Interventional Cardiologist</span>
-    </div>
+<div class="note-proffesion">
+    Fetal and Pediatric Interventional Cardiologist
+</div>   
+ </div>
   </div>
 
   <div class="note-line">
@@ -147,7 +164,7 @@ hr.divider { border:none; border-top:2px solid #1e3a8a; margin:8px 0 10px; }
     <h3>TINY HEARTS HOSPITAL</h3>
     <p>Selvam Nagar, 15 A, Medical College Rd, Membalam, Thanjavur</p>
     <div class="footer-bottom">
-      <div>Insta: @tinyheartsthanjavur</div>
+      <div>Insta: @tinyheartsthanjavur<br>FB: Tiny Hearts Thanjavur</div>
       <div>Web: <a href="https://tinyheartshospital.com/" target="_blank">https://tinyheartshospital.com/</a></div>
     </div>
   </div>

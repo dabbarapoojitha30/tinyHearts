@@ -1,54 +1,30 @@
-body {
-  font-family: 'Poppins', sans-serif;
-  background: #f2f5f9;
-  margin: 0; padding: 0;
-}
-
-.page {
-  width: 210mm;
-  min-height: 297mm;
-  background: #fff;
-  margin: 10mm auto;
-  padding: 30px 30px 150px;
-  box-shadow: 0 0 10px rgba(0,0,0,0.1);
-  position: relative;
-}
-
-.header { display: flex; justify-content: space-between; align-items: flex-start; }
-.header-left h1 { color: #d32f2f; margin: 0; font-size: 26px; }
-.header-left h2 { margin: 2px 0; font-size: 16px; color: #3a5964; }
-.header-left h4 { margin: 2px 0; font-size: 12px; }
-.header-right { text-align: center; font-size: 13px; }
-.header-right img { max-height: 120px; display: block; margin: 0 auto 6px; }
-
-.divider { border:none; border-top:2px solid #1e3a8a; margin:15px 0 25px; }
-
-.watermark { position: absolute; top:50%; left:50%; transform: translate(-50%, -50%); opacity:0.08; z-index:0; }
-.watermark img { width:300px; }
-
-.patient-details { display: flex; justify-content: space-between; flex-wrap: wrap; font-size: 14px; }
-.patient-left, .patient-right { width: 48%; }
-.field { margin-bottom: 6px; }
-.field-label { font-weight: 500; }
-.field-value { margin-left: 5px; }
-.section-title { font-weight: 600; margin-top: 15px; text-decoration: underline; }
-
-.impression { font-size: 15px; line-height: 1.6; text-transform: uppercase; padding: 8px; }
-.review-doctor { display: flex; justify-content: space-between; margin-top: 30px; font-size: 14px; }
-.doctor-right { text-align: right; }
-.doctor-right h3 { margin: 0; }
-.doctor-right span { font-size: 13px; font-style: italic; }
-
-.footer-divider { position: absolute; bottom: 140px; left: 30px; right: 30px; border-top: 2px solid #1e3a8a; }
-.footer { position: absolute; bottom: 55px; left: 30px; right: 30px; text-align: center; font-size: 14px; }
-.footer h3 { margin: 0; font-size: 16px; font-weight: 600; }
-.footer p { margin: 4px 0; font-size: 13px; }
-.footer-bottom { display: flex; justify-content: space-between; margin-top: 10px; font-size: 13px; }
-.footer a { color: #000; text-decoration: none; font-weight: 500; }
-.footer a:hover { text-decoration: underline; }
-.copyright { position: absolute; bottom: 20px; right: 30px; font-size: 11px; color: #333; }
-
-@media print {
-  body { background: none; }
-  .page { box-shadow:none; margin:0; }
-}
+body { font-family: 'Poppins', sans-serif; background: #f2f5f9; margin: 0; padding: 0; }
+.page { width: 210mm; min-height: 297mm; background: #fff; margin: 10mm auto; padding: 30px 30px 150px; box-shadow:0 0 10px rgba(0,0,0,0.1); position: relative; }
+.header { display:flex; justify-content:space-between; align-items:flex-start; }
+.header-left h1{ color:#d32f2f; margin:0; font-size:26px; }
+.header-left h2{ margin:2px 0; font-size:16px; color:#3a5964; }
+.header-left h4{ margin:2px 0; font-size:12px; }
+.header-right{ text-align:center; font-size:13px; }
+.header-right img{ max-height:120px; display:block; margin:0 auto 6px; }
+.divider{ border:none; border-top:2px solid #1e3a8a; margin:15px 0 25px; }
+.watermark{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); opacity:0.08; z-index:0; }
+.watermark img{ width:300px; }
+.patient-details{ display:flex; justify-content:space-between; flex-wrap:wrap; font-size:14px; }
+.patient-left, .patient-right{ width:48%; }
+.field{ margin-bottom:6px; }
+.field-label{ font-weight:500; }
+.field-value{ margin-left:5px; }
+.section-title{ font-weight:600; margin-top:15px; text-decoration:underline; }
+.impression{ font-size:15px; line-height:1.6; text-transform:uppercase; padding:8px; }
+.review-doctor{ display:flex; justify-content:space-between; margin-top:30px; font-size:14px; }
+.doctor-right{text-align:right;}
+.doctor-right h3{ margin:0; }
+.doctor-right span{ font-size:13px; font-style:italic; }
+.footer-divider{ position:absolute; bottom:140px; left:30px; right:30px; border-top:2px solid #1e3a8a; }
+.footer{ position:absolute; bottom:55px; left:30px; right:30px; text-align:center; font-size:14px; }
+.footer h3{ margin:0; font-size:16px; font-weight:600; }
+.footer p{ margin:4px 0; font-size:13px; }
+.footer-bottom{ display:flex; justify-content:space-between; margin-top:10px; font-size:13px; }
+.footer a{ color:#000; text-decoration:none; font-weight:500; }
+.copyright{ position:absolute; bottom:20px; right:30px; font-size:11px; color:#333; }
+@media print { body{ background:none; } .page{ box-shadow:none; margin:0; } }
