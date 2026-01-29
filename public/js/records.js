@@ -1,15 +1,13 @@
 const table = document.getElementById('patientsTable').querySelector('tbody');
 const searchInput = document.getElementById('searchId');
 const searchBtn = document.getElementById('searchBtn');
+const resetBtn = document.getElementById('resetBtn');
 
 // ------------------- DATE FORMAT DD/MM/YYYY -------------------
 function formatDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0'); // Months are 0-based
-    const year = d.getFullYear();
-    return `${day}/${month}/${year}`;
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 }
 
 // ------------------- LOAD ALL PATIENTS -------------------
@@ -70,9 +68,11 @@ async function generatePDF(id) {
         const res = await fetch(`/patients/${id}`);
         const data = await res.json();
 
-        if (data.error) { alert(data.error); return; }
+        if (!res.ok || data.error) {
+            throw new Error(data.error || "Patient fetch failed");
+        }
 
-        // Format DOB and Review Date as DD/MM/YYYY
+        // Format dates
         data.dob = formatDate(data.dob);
         data.review_date = formatDate(data.review_date);
 
@@ -82,15 +82,28 @@ async function generatePDF(id) {
             body: JSON.stringify(data)
         });
 
+        if (!pdfRes.ok) {
+            const text = await pdfRes.text();
+            throw new Error(text || "PDF generation failed");
+        }
+
         const blob = await pdfRes.blob();
+        if (blob.type !== "application/pdf") {
+            throw new Error("Server did not return a PDF");
+        }
+
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
         a.download = `TinyHeartsReport-${data.name.replace(/[^a-z0-9]/gi, "_")}.pdf`;
+        document.body.appendChild(a);
         a.click();
+        a.remove();
         URL.revokeObjectURL(url);
+
     } catch (err) {
         alert("PDF generation failed: " + err.message);
+        console.error(err);
     }
 }
 
@@ -117,7 +130,7 @@ searchBtn.addEventListener('click', () => {
 });
 
 // ------------------- RESET FUNCTION -------------------
-document.getElementById('resetBtn').addEventListener('click', () => {
+resetBtn.addEventListener('click', () => {
     document.querySelectorAll('#patientsTable tbody tr').forEach(row => {
         row.style.display = '';
         row.classList.remove('highlight');

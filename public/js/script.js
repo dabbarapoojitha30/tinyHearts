@@ -5,10 +5,7 @@ document.getElementById('currentDate').innerText = new Date().toLocaleDateString
 function formatDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
-    const day = String(d.getDate()).padStart(2,'0');
-    const month = String(d.getMonth()+1).padStart(2,'0');
-    const year = d.getFullYear();
-    return `${day}/${month}/${year}`;
+    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 }
 
 // ------------------- AUTO-CALCULATE AGE -------------------
@@ -26,8 +23,7 @@ dobInput.addEventListener('change', () => {
 
     if (days < 0) {
         months--;
-        const lastMonth = new Date(today.getFullYear(), today.getMonth(), 0);
-        days += lastMonth.getDate();
+        days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
     }
     if (months < 0) {
         years--;
@@ -36,7 +32,7 @@ dobInput.addEventListener('change', () => {
     ageInput.value = `${years}y ${months}m ${days}d`;
 });
 
-// ------------------- OTHERS FIELDS HANDLING -------------------
+// ------------------- OTHERS FIELDS -------------------
 const othersFields = [
     ['diagnosis','diagnosisOther'], ['situsLoop','situsLoopOther'], ['systemicVeins','systemicVeinsOther'],
     ['pulmonaryVeins','pulmonaryVeinsOther'], ['atria','atriaOther'], ['atrialSeptum','atrialSeptumOther'],
@@ -60,7 +56,6 @@ othersFields.forEach(([selId, taId]) => {
 function camelToSnake(str){
     return str.replace(/[A-Z]/g, l => `_${l.toLowerCase()}`);
 }
-
 function setSelectOrOther(selId, taId, value){
     const sel = document.getElementById(selId);
     const ta = document.getElementById(taId);
@@ -73,7 +68,6 @@ function setSelectOrOther(selId, taId, value){
         if(ta){ ta.classList.remove('d-none'); ta.value = value; }
     }
 }
-
 function getValue(selId, taId){
     const sel = document.getElementById(selId);
     const ta = document.getElementById(taId);
@@ -201,56 +195,17 @@ document.getElementById("downloadReport").addEventListener("click", async () => 
             headers:{"Content-Type":"application/json"},
             body:JSON.stringify(payload)
         });
-        if(!res.ok) throw new Error(res.statusText);
+
+        if(!res.ok) throw new Error(await res.text());
+
         const blob = await res.blob();
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
         a.download = `TinyHeartsReport-${payload.name.replace(/[^a-z0-9]/gi,'_')}.pdf`;
+        document.body.appendChild(a);
         a.click();
+        a.remove();
         window.URL.revokeObjectURL(url);
     } catch(err){ alert("PDF failed: "+err.message); }
-});
-
-// ------------------- SEARCH PATIENT -------------------
-const searchBtn2 = document.getElementById("searchBtn");
-const searchInput2 = document.getElementById("searchId");
-const searchResult2 = document.getElementById("searchResult");
-
-searchBtn2.addEventListener("click", async () => {
-    const id = searchInput2.value.trim();
-    if(!id){ alert("Enter Patient ID"); return; }
-    try{
-        const res = await fetch(`/patients/${id}`);
-        if(res.status === 404){ searchResult2.innerText="Patient not found"; return; }
-        if(!res.ok) throw new Error(res.statusText);
-        const data = await res.json();
-
-        searchResult2.innerText = `
-Patient ID: ${data.patient_id}
-Name: ${data.name}
-DOB: ${formatDate(data.dob)}
-Review Date: ${formatDate(data.review_date)}
-Age: ${data.age || ''}
-Sex: ${data.sex || ''}
-Weight: ${data.weight || ''} kg
-Phone1: ${data.phone1 || ''}
-Phone2: ${data.phone2 || ''}
-Location: ${data.location || ''}
-Diagnosis: ${data.diagnosis || ''}
-Situs & Looping: ${data.situs_loop || ''}
-Systemic Veins: ${data.systemic_veins || ''}
-Pulmonary Veins: ${data.pulmonary_veins || ''}
-Atria: ${data.atria || ''}
-Atrial Septum: ${data.atrial_septum || ''}
-AV Valves: ${data.av_valves || ''}
-Ventricles: ${data.ventricles || ''}
-Ventricular Septum: ${data.ventricular_septum || ''}
-Outflow Tracts: ${data.outflow_tracts || ''}
-Pulmonary Arteries: ${data.pulmonary_arteries || ''}
-Aortic Arch: ${data.aortic_arch || ''}
-Others: ${data.others_field || ''}
-Impression: ${data.impression || ''}
-        `;
-    } catch(err){ searchResult2.innerText="Error fetching patient: "+err.message; }
 });

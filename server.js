@@ -6,7 +6,6 @@ const path = require("path");
 const { body, validationResult } = require("express-validator");
 const pool = require("./db");
 
-// ✅ REQUIRED FOR RENDER
 const puppeteer = require("puppeteer-core");
 const chromium = require("@sparticuz/chromium");
 
@@ -51,9 +50,7 @@ function formatDateForPDF(dateStr) {
   if (!dateStr) return "";
   const d = new Date(dateStr);
   if (isNaN(d)) return "";
-  return `${String(d.getDate()).padStart(2, "0")}/${String(
-    d.getMonth() + 1
-  ).padStart(2, "0")}/${d.getFullYear()}`;
+  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
 }
 
 // ---------------- VALIDATION ----------------
@@ -95,17 +92,14 @@ app.post("/patients", patientValidationRules, async (req, res) => {
 
     res.json({ status: "success" });
   } catch (err) {
-    if (err.code === "23505")
-      return res.status(409).json({ error: "Patient ID already exists" });
+    if (err.code === "23505") return res.status(409).json({ error: "Patient ID already exists" });
     res.status(500).json({ error: err.message });
   }
 });
 
 app.get("/patients", async (_, res) => {
   try {
-    const r = await pool.query(
-      "SELECT patient_id, name, age, location FROM patients ORDER BY created_at DESC"
-    );
+    const r = await pool.query("SELECT patient_id, name, age, location FROM patients ORDER BY created_at DESC");
     res.json(r.rows);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -114,10 +108,7 @@ app.get("/patients", async (_, res) => {
 
 app.get("/patients/:id", async (req, res) => {
   try {
-    const r = await pool.query(
-      "SELECT * FROM patients WHERE patient_id=$1",
-      [req.params.id]
-    );
+    const r = await pool.query("SELECT * FROM patients WHERE patient_id=$1", [req.params.id]);
     if (!r.rowCount) return res.status(404).json({ error: "Patient not found" });
     res.json(r.rows[0]);
   } catch (err) {
@@ -160,24 +151,16 @@ async function generatePDFFromHTML(fileName, data) {
   data.report_date = formatDateForPDF(new Date());
 
   let html = fs.readFileSync(htmlPath, "utf8");
-
-  for (const key in data) {
-    html = html.replace(new RegExp(`{{${key}}}`, "g"), data[key] || "");
-  }
+  for (const key in data) html = html.replace(new RegExp(`{{${key}}}`, "g"), data[key] || "");
 
   const logoPath = path.join(__dirname, "public", "logo.png");
-  if (fs.existsSync(logoPath)) {
-    html = html.replace(
-      /<img src="logo\.png"\s*\/?>/g,
-      `<img src="file://${logoPath}" />`
-    );
-  }
+  if (fs.existsSync(logoPath)) html = html.replace(/<img src="logo\.png"\s*\/?>/g, `<img src="file://${logoPath}" />`);
 
   const browser = await puppeteer.launch({
-    args: chromium.args,
-    defaultViewport: chromium.defaultViewport,
     executablePath: await chromium.executablePath(),
-    headless: chromium.headless
+    headless: true,
+    args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+    defaultViewport: chromium.defaultViewport
   });
 
   const page = await browser.newPage();
@@ -194,26 +177,18 @@ async function generatePDFFromHTML(fileName, data) {
   return pdf;
 }
 
-// ---------------- PDF ENDPOINT ----------------
 app.post("/generate-pdf", async (req, res) => {
   try {
     const pdf = await generatePDFFromHTML("report.html", req.body);
-
     res.setHeader("Content-Type", "application/pdf");
-    res.setHeader(
-      "Content-Disposition",
-      `attachment; filename="TinyHeartsReport.pdf"`
-    );
-
+    res.setHeader("Content-Disposition", `attachment; filename="TinyHeartsReport.pdf"`);
     res.end(pdf);
   } catch (err) {
     console.error("PDF ERROR:", err);
-    res.status(500).json({ error: err.message });
+    res.status(500).send(`PDF generation failed: ${err.message}`);
   }
 });
 
 // ---------------- START SERVER ----------------
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () =>
-  console.log(`✅ Server running on port ${PORT}`)
-);
+app.listen(PORT, () => console.log(`✅ Server running on port ${PORT}`));
