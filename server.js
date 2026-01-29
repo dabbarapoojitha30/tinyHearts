@@ -60,7 +60,7 @@ function formatDateForPDF(dateStr) {
         name VARCHAR(100) NOT NULL,
         dob DATE,
         age TEXT,
-        review_date DATE,
+        review_date DATE,           -- make sure this exists!
         sex VARCHAR(10),
         weight NUMERIC(5,2),
         phone1 VARCHAR(10),
@@ -88,6 +88,7 @@ function formatDateForPDF(dateStr) {
     console.error("❌ DB setup error:", err.message);
   }
 })();
+
 
 // ---------------- VALIDATION ----------------
 const patientValidationRules = [
@@ -235,7 +236,10 @@ async function generatePDFFromHTML(fileName, data){
     html = html.replace("</head>",`<style>${css}</style></head>`);
   }
 
-  const browser = await puppeteer.launch({ headless: true });
+const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox', '--disable-setuid-sandbox']
+});
   const page = await browser.newPage();
   await page.setContent(html,{waitUntil:"networkidle0"});
   const pdf = await page.pdf({
