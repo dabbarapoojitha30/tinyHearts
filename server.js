@@ -11,6 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
+
 const LOCATION_CODES = {
   "Arthi Hospital, Kumbakonam": "KUM",
   "Senthil Nursing Home, Puthukottai": "PUTS",
@@ -40,7 +41,6 @@ function calculateAge(dob) {
   return `${years}y ${months}m ${days}d`;
 }
 
-// Format date to DD/MM/YYYY
 function formatDateForPDF(dateStr) {
   if (!dateStr) return '';
   const d = new Date(dateStr);
@@ -50,45 +50,6 @@ function formatDateForPDF(dateStr) {
   const year = d.getFullYear();
   return `${day}/${month}/${year}`;
 }
-
-// ---------------- DB SETUP ----------------
-(async () => {
-  try {
-    await pool.query(`
-      CREATE TABLE IF NOT EXISTS patients (
-        patient_id VARCHAR(50) PRIMARY KEY,
-        name VARCHAR(100) NOT NULL,
-        dob DATE,
-        age TEXT,
-        review_date DATE,           -- make sure this exists!
-        sex VARCHAR(10),
-        weight NUMERIC(5,2),
-        phone1 VARCHAR(10),
-        phone2 VARCHAR(10),
-        location TEXT,
-        diagnosis TEXT,
-        situs_loop TEXT,
-        systemic_veins TEXT,
-        pulmonary_veins TEXT,
-        atria TEXT,
-        atrial_septum TEXT,
-        av_valves TEXT,
-        ventricles TEXT,
-        ventricular_septum TEXT,
-        outflow_tracts TEXT,
-        pulmonary_arteries TEXT,
-        aortic_arch TEXT,
-        others_field TEXT,
-        impression TEXT,
-        created_at TIMESTAMP DEFAULT NOW()
-      );
-    `);
-    console.log("✅ Table 'patients' ready");
-  } catch (err) {
-    console.error("❌ DB setup error:", err.message);
-  }
-})();
-
 
 // ---------------- VALIDATION ----------------
 const patientValidationRules = [
@@ -195,7 +156,6 @@ app.get("/generate-patient-id", async (req, res) => {
   if (!code) return res.status(400).json({ error: "Invalid location" });
 
   try {
-    // Get last patient ID for this location
     const r = await pool.query(
       "SELECT patient_id FROM patients WHERE patient_id LIKE $1 ORDER BY created_at DESC LIMIT 1",
       [`${code}-%`]
@@ -225,21 +185,29 @@ async function generatePDFFromHTML(fileName, data){
 
   let html = fs.readFileSync(htmlPath,"utf8");
 
+  // Replace all placeholders
   for(const key in data){
     const re = new RegExp(`{{${key}}}`,"g");
-    html = html.replace(re,data[key]||"");
+    html = html.replace(re, data[key] || "");
   }
 
+  // Replace logo with absolute path
+  const logoPath = path.join(__dirname, "public", "logo.png");
+  if(fs.existsSync(logoPath)){
+    html = html.replace(/{{logo}}/g, `file://${logoPath}`);
+  }
+
+  // Add CSS inline
   const cssPath = path.join(__dirname,"public/style.css");
   if(fs.existsSync(cssPath)){
     const css = fs.readFileSync(cssPath,"utf8");
     html = html.replace("</head>",`<style>${css}</style></head>`);
   }
 
-const browser = await puppeteer.launch({
-    headless: true,
-    args: ['--no-sandbox', '--disable-setuid-sandbox']
-});
+  const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+  });
   const page = await browser.newPage();
   await page.setContent(html,{waitUntil:"networkidle0"});
   const pdf = await page.pdf({

@@ -1,13 +1,5 @@
-require("dotenv").config();
-const { Pool } = require("pg");
-
-const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: process.env.DB_PASSWORD,
-  port: process.env.DB_PORT,
-});
+// createTable.js
+const pool = require("./db"); // just import pool from db.js
 
 (async () => {
   try {
@@ -18,6 +10,7 @@ const pool = new Pool({
         name VARCHAR(100) NOT NULL,
         dob DATE,
         age TEXT,
+        review_date DATE,
         sex VARCHAR(10),
         weight NUMERIC(5,2),
         phone1 VARCHAR(10),
@@ -41,16 +34,10 @@ const pool = new Pool({
       );
     `);
 
-    // 🔥 THIS IS THE KEY FIX
-    await pool.query(`
-      ALTER TABLE patients
-      ADD COLUMN IF NOT EXISTS review_date DATE;
-    `);
-
-    console.log("✅ patients table ready (review_date ensured)");
+    console.log("✅ Table 'patients' ready");
     process.exit(0);
   } catch (err) {
-    console.error("❌ Error setting up table:", err.message);
+    console.error("❌ Error creating table:", err.message);
     process.exit(1);
   }
 })();
