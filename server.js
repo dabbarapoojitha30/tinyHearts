@@ -1,3 +1,4 @@
+// server.js
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
@@ -5,7 +6,8 @@ const fs = require("fs");
 const path = require("path");
 const { body, validationResult } = require("express-validator");
 const pool = require("./db");
-const puppeteer = require("puppeteer");
+const chromium = require("@sparticuz/chrome-aws-lambda");
+const puppeteer = require("puppeteer-core");
 
 const app = express();
 app.use(cors());
@@ -178,7 +180,6 @@ async function generatePDFFromHTML(fileName, data){
   const htmlPath = path.join(__dirname,"public",fileName);
   if(!fs.existsSync(htmlPath)) throw new Error("HTML template not found");
 
-  // Format dates
   if(data.dob) data.dob = formatDateForPDF(data.dob);
   if(data.review_date) data.review_date = formatDateForPDF(data.review_date);
   data.report_date = data.report_date ? formatDateForPDF(data.report_date) : formatDateForPDF(new Date());
@@ -204,17 +205,22 @@ async function generatePDFFromHTML(fileName, data){
     html = html.replace("</head>",`<style>${css}</style></head>`);
   }
 
+  // Launch Chromium using sparticuz
   const browser = await puppeteer.launch({
-      headless: true,
-      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage']
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath(),
+    headless: chromium.headless,
   });
+
   const page = await browser.newPage();
-  await page.setContent(html,{waitUntil:"networkidle0"});
+  await page.setContent(html, { waitUntil: "networkidle0" });
   const pdf = await page.pdf({
-    format:"A4",
-    printBackground:true,
-    margin:{top:"10px",bottom:"10px",left:"10px",right:"10px"}
+    format: "A4",
+    printBackground: true,
+    margin: { top: "10px", bottom: "10px", left: "10px", right: "10px" }
   });
+
   await browser.close();
   return pdf;
 }
