@@ -153,8 +153,14 @@ async function generatePDFFromHTML(fileName, data) {
   let html = fs.readFileSync(htmlPath, "utf8");
   for (const key in data) html = html.replace(new RegExp(`{{${key}}}`, "g"), data[key] || "");
 
-  const logoPath = path.join(__dirname, "public", "logo.png");
-  if (fs.existsSync(logoPath)) html = html.replace(/<img src="logo\.png"\s*\/?>/g, `<img src="file://${logoPath}" />`);
+  const logoPath = path.join(__dirname, "public", "logo.png").replace(/\\/g, "/");
+if (fs.existsSync(logoPath)) {
+  html = html.replace(
+    /<img src="logo\.png"\s*\/?>/g,
+    `<img src="file://${logoPath}" />`
+  );
+}
+
 
   const browser = await puppeteer.launch({
     executablePath: await chromium.executablePath(),
