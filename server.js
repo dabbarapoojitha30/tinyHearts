@@ -12,7 +12,7 @@ const chromium = require("@sparticuz/chromium");
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "public"))); // serve static files like logo.png
 
 // ---------------- LOCATION CODES ----------------
 const LOCATION_CODES = {
@@ -30,19 +30,11 @@ function calculateAge(dob) {
   const birth = new Date(dob);
   const today = new Date();
   if (isNaN(birth)) return "";
-
   let years = today.getFullYear() - birth.getFullYear();
   let months = today.getMonth() - birth.getMonth();
   let days = today.getDate() - birth.getDate();
-
-  if (days < 0) {
-    months--;
-    days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
-  }
-  if (months < 0) {
-    years--;
-    months += 12;
-  }
+  if (days < 0) { months--; days += new Date(today.getFullYear(), today.getMonth(), 0).getDate(); }
+  if (months < 0) { years--; months += 12; }
   return `${years}y ${months}m ${days}d`;
 }
 
@@ -101,9 +93,7 @@ app.get("/patients", async (_, res) => {
   try {
     const r = await pool.query("SELECT patient_id, name, age, location FROM patients ORDER BY created_at DESC");
     res.json(r.rows);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.get("/patients/:id", async (req, res) => {
@@ -111,9 +101,7 @@ app.get("/patients/:id", async (req, res) => {
     const r = await pool.query("SELECT * FROM patients WHERE patient_id=$1", [req.params.id]);
     if (!r.rowCount) return res.status(404).json({ error: "Patient not found" });
     res.json(r.rows[0]);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ---------------- GENERATE PATIENT ID ----------------
@@ -136,9 +124,7 @@ app.get("/generate-patient-id", async (req, res) => {
       if (!isNaN(last)) next = last + 1;
     }
     res.json({ patient_id: `${code}-${next}` });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // ---------------- PDF GENERATION ----------------
@@ -153,14 +139,11 @@ async function generatePDFFromHTML(fileName, data) {
   let html = fs.readFileSync(htmlPath, "utf8");
   for (const key in data) html = html.replace(new RegExp(`{{${key}}}`, "g"), data[key] || "");
 
+  // Use Render-compatible absolute path for local logo
   const logoPath = path.join(__dirname, "public", "logo.png").replace(/\\/g, "/");
-if (fs.existsSync(logoPath)) {
-  html = html.replace(
-    /<img src="logo\.png"\s*\/?>/g,
-    `<img src="file://${logoPath}" />`
-  );
-}
-
+  if (fs.existsSync(logoPath)) {
+    html = html.replace(/<img src="logo\.png"\s*\/?>/g, `<img src="file://${logoPath}" />`);
+  }
 
   const browser = await puppeteer.launch({
     executablePath: await chromium.executablePath(),
