@@ -38,7 +38,7 @@ hr.divider { border:none; border-top:2px solid #1e3a8a; margin:8px 0 10px; }
 
 .section-title { font-weight:600; margin:10px 0 3px; text-decoration:underline; font-size:14px; page-break-inside:avoid; }
 .field { margin-bottom:4px; font-size:13px; page-break-inside:avoid; }
-.field-label { font-weight:700; } /* still bold for PDF compatibility */
+.field-label { font-weight:700; }
 .field-value { font-weight:500; margin-left:3px; }
 
 .patient-details { display:flex; justify-content:space-between; flex-wrap:wrap; }
@@ -48,20 +48,27 @@ hr.divider { border:none; border-top:2px solid #1e3a8a; margin:8px 0 10px; }
   text-align: center;
   font-weight:600;
   font-size:14px;
-
 }
 
 .impression { font-size:14px; line-height:1.4; padding:6px; text-transform:uppercase; }
 
 .review-doctor { display:flex; justify-content:space-between; margin-top:15px; font-size:13px; }
 .review-left { max-width:60%; }
-.review-left p { margin:2px 0;  }
+.review-left p { margin:2px 0; }
 .doctor-right { text-align:right; }
 .doctor-right h3 { margin:0; font-size:14px; }
 .doctor-right span { font-size:12px; }
 
 .note-line { margin:5px 0 10px; font-size:12px; }
 .note-proffesion{margin:5px 0 10px; font-size:12px;}
+
+/* ---------- FOOTER FIX ---------- */
+.footer-wrapper {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+}
 
 .footer-divider { border-top:2px solid #1e3a8a; margin:10px 0; }
 .footer { text-align:center; font-size:12px; }
@@ -90,7 +97,7 @@ hr.divider { border:none; border-top:2px solid #1e3a8a; margin:8px 0 10px; }
       <h4>E-mail: tinyheartsthanjavur@gmail.com</h4>
     </div>
     <div class="header-right">
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMvSDnGGWqdpkPfwu5e9NH2_IkhSXJTx7wtQ&s">
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMvSDnGGWqdpkPfwu5e9NH2_IkhSXJTx7wtQ&s">
       <div>Report Date: {{report_date}}</div>
     </div>
   </div>
@@ -147,30 +154,33 @@ hr.divider { border:none; border-top:2px solid #1e3a8a; margin:8px 0 10px; }
     <div class="review-left"><strong>Review Date: {{review_date}}</strong></div>
     <div class="doctor-right">
       <h3>Dr. Mani Ram Krishna</h3>
-<div class="note-proffesion">
-    Fetal and Pediatric Interventional Cardiologist
-</div>   
- </div>
+      <div class="note-proffesion">
+        Fetal and Pediatric Interventional Cardiologist
+      </div>   
+    </div>
   </div>
 
   <div class="note-line">
     Kindly note that this is a bedside evaluation performed under sub-optimal conditions.
   </div>
 
-  <!-- FOOTER -->
-  <div class="footer-divider"></div>
-  <div class="footer">
-    <h3>TINY HEARTS HOSPITAL</h3>
-    <p>Selvam Nagar, 15 A, Medical College Rd, Membalam, Thanjavur</p>
-    <div class="footer-bottom">
-      <div>Insta: @tinyheartsthanjavur<br>FB: Tiny Hearts Thanjavur</div>
-      <div>Web: <a href="https://tinyheartshospital.com/" target="_blank">https://tinyheartshospital.com/</a></div>
+  <!-- FOOTER (FIXED AT BOTTOM) -->
+  <div class="footer-wrapper">
+    <div class="footer-divider"></div>
+    <div class="footer">
+      <h3>TINY HEARTS HOSPITAL</h3>
+      <p>Selvam Nagar, 15 A, Medical College Rd, Membalam, Thanjavur</p>
+      <div class="footer-bottom">
+        <div>Insta: @tinyheartsthanjavur<br>FB: Tiny Hearts Thanjavur</div>
+        <div>Web: <a href="https://tinyheartshospital.com/" target="_blank">https://tinyheartshospital.com/</a></div>
+      </div>
+    </div>
+
+    <div class="copyright">
+      © 2026 INNOVAISZ CORP | All Rights Reserved
     </div>
   </div>
 
-  <div class="copyright">
-    © 2026 INNOVAISZ CORP | All Rights Reserved
-  </div>
 </div>
 </body>
 </html>
