@@ -101,10 +101,10 @@ if(locationSelect && patientIdInput){
         try {
             const res = await fetch(`/generate-patient-id?location=${encodeURIComponent(loc)}`);
             const data = await res.json();
-            patientIdInput.value = data.patient_id || code + "1";
+            patientIdInput.value = data.patient_id || code + "-1";
         } catch(err){
             console.error("Failed to generate patient ID:", err);
-            patientIdInput.value = code + "1";
+            patientIdInput.value = code + "-1";
         }
     });
 }
@@ -218,5 +218,42 @@ if(downloadBtn){
             a.remove();
             window.URL.revokeObjectURL(url);
         } catch(err){ alert("PDF failed: "+err.message); }
+    });
+}
+
+// ------------------- SEARCH PATIENT -------------------
+const searchInput = document.getElementById('searchId');
+const searchBtn = document.getElementById('searchBtn');
+const searchResult = document.getElementById('searchResult');
+
+if(searchBtn && searchInput && searchResult){
+    searchBtn.addEventListener('click', async () => {
+        const searchId = searchInput.value.trim();
+        if(!searchId){ alert("Enter Patient ID"); return; }
+
+        try{
+            const res = await fetch(`/patients/${encodeURIComponent(searchId)}`);
+            if(!res.ok) throw new Error("Patient not found");
+            const data = await res.json();
+
+            let html = `
+Patient ID: ${data.patient_id}
+Name: ${data.name}
+DOB: ${data.dob ? formatDate(data.dob) : ''}
+Age: ${data.age}
+Sex: ${data.sex}
+Weight: ${data.weight || ''} kg
+Location: ${data.location || ''}
+Phone 1: ${data.phone1 || ''}
+Phone 2: ${data.phone2 || ''}
+Diagnosis: ${data.diagnosis || ''}
+Impression: ${data.impression || ''}
+Review Date: ${data.review_date ? formatDate(data.review_date) : ''}
+            `;
+            searchResult.innerText = html;
+        } catch(err){
+            alert(err.message);
+            searchResult.innerText = '';
+        }
     });
 }
