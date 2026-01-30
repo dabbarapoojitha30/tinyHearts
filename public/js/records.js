@@ -13,7 +13,7 @@ function formatDate(dateStr) {
 
 // ------------------- LOAD ALL PATIENTS -------------------
 async function loadPatients() {
-    if (!table) return;
+    if(!table) return;
     try {
         const res = await fetch('/patients');
         const data = await res.json();
@@ -51,17 +51,17 @@ function editPatient(id) {
 
 // ------------------- DELETE -------------------
 async function deletePatient(id) {
-    if (!confirm("Delete this patient?")) return;
+    if(!confirm("Delete this patient?")) return;
     try {
         const res = await fetch(`/patients/${id}`, { method: 'DELETE' });
-        if (!res.ok) {
+        if(!res.ok){
             const text = await res.text();
             throw new Error(text || "Delete failed");
         }
         alert("Patient deleted successfully");
         loadPatients();
-    } catch(err) {
-        alert("Delete error: " + err.message);
+    } catch(err){
+        alert("Delete error: "+err.message);
         console.error(err);
     }
 }
@@ -69,63 +69,60 @@ async function deletePatient(id) {
 // ------------------- GENERATE PDF -------------------
 async function generatePDF(id) {
     try {
-        // Fetch full patient record
         const res = await fetch(`/patients/${id}`);
-        if (!res.ok) throw new Error("Patient fetch failed");
+        if(!res.ok) throw new Error("Patient fetch failed");
         const data = await res.json();
 
-        // Send full record to server; server formats dates
+        // Do NOT format dates here — server will format
         const pdfRes = await fetch('/generate-pdf', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
             body: JSON.stringify(data)
         });
-
-        if (!pdfRes.ok) throw new Error(await pdfRes.text());
+        if(!pdfRes.ok) throw new Error(await pdfRes.text());
 
         const blob = await pdfRes.blob();
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `TinyHeartsReport-${data.name.replace(/[^a-z0-9]/gi, '_')}.pdf`;
+        a.download = `TinyHeartsReport-${data.name.replace(/[^a-z0-9]/gi,'_')}.pdf`;
         document.body.appendChild(a);
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
-
-    } catch(err) {
-        alert("PDF failed: " + err.message);
+    } catch(err){
+        alert("PDF failed: "+err.message);
         console.error(err);
     }
 }
 
 // ------------------- SEARCH -------------------
-if(searchBtn && searchInput) {
+if(searchBtn && searchInput){
     searchBtn.addEventListener('click', () => {
         const searchId = searchInput.value.trim().toLowerCase();
-        if (!searchId) { alert("Enter Patient ID"); return; }
+        if(!searchId){ alert("Enter Patient ID"); return; }
 
         let found = false;
-        document.querySelectorAll('#patientsTable tbody tr').forEach(row => {
+        document.querySelectorAll('#patientsTable tbody tr').forEach(row=>{
             const rowId = row.cells[0].innerText.toLowerCase();
-            if (rowId === searchId) {
+            if(rowId === searchId){
                 row.style.display = '';
                 row.classList.add('highlight');
-                row.scrollIntoView({ behavior:'smooth', block:'center' });
+                row.scrollIntoView({behavior:'smooth', block:'center'});
                 found = true;
             } else {
                 row.style.display = 'none';
                 row.classList.remove('highlight');
             }
         });
-        if (!found) alert("Patient not found");
+        if(!found) alert("Patient not found");
     });
 }
 
 // ------------------- RESET -------------------
-if(resetBtn) {
+if(resetBtn){
     resetBtn.addEventListener('click', () => {
-        document.querySelectorAll('#patientsTable tbody tr').forEach(row => {
+        document.querySelectorAll('#patientsTable tbody tr').forEach(row=>{
             row.style.display = '';
             row.classList.remove('highlight');
         });

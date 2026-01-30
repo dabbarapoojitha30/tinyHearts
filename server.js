@@ -5,7 +5,6 @@ const fs = require("fs");
 const path = require("path");
 const { body, validationResult } = require("express-validator");
 const pool = require("./db");
-
 const puppeteer = require("puppeteer-core");
 const chromium = require("@sparticuz/chromium");
 
@@ -170,67 +169,62 @@ app.get("/generate-patient-id", async (req, res) => {
 
 // ---------------- PDF GENERATION ----------------
 async function generatePDFFromHTML(fileName, data) {
-    const htmlPath = path.join(__dirname, "public", fileName);
-    if (!fs.existsSync(htmlPath)) throw new Error("HTML template not found");
+  const htmlPath = path.join(__dirname, "public", fileName);
+  if (!fs.existsSync(htmlPath)) throw new Error("HTML template not found");
 
-    // Server-side date formatting
-    data.dob = data.dob ? formatDateForPDF(data.dob) : "";
-    data.review_date = data.review_date ? formatDateForPDF(data.review_date) : "";
-    data.report_date = formatDateForPDF(new Date());
+  // Format dates server-side
+  data.dob = data.dob ? formatDateForPDF(data.dob) : "";
+  data.review_date = data.review_date ? formatDateForPDF(data.review_date) : "";
+  data.report_date = formatDateForPDF(new Date());
 
-    let html = fs.readFileSync(htmlPath, "utf8");
+  let html = fs.readFileSync(htmlPath, "utf8");
 
-    // Replace placeholders in HTML
-    for (const key in data) html = html.replace(new RegExp(`{{${key}}}`, "g"), data[key] || "");
+  // Replace placeholders
+  for (const key in data) html = html.replace(new RegExp(`{{${key}}}`, "g"), data[key] || "");
 
-    // Launch Puppeteer safely
-    const browser = await puppeteer.launch({
-        executablePath: await chromium.executablePath(),
-        headless: true,
-        args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
-        defaultViewport: chromium.defaultViewport
+  // Launch browser safely
+  const browser = await puppeteer.launch({
+    executablePath: await chromium.executablePath(),
+    headless: true,
+    args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+    defaultViewport: chromium.defaultViewport
+  });
+
+  try {
+    const page = await browser.newPage();
+    await page.setContent(html, { waitUntil: 'load', timeout: 60000 });
+    await page.evaluateHandle("document.fonts.ready");
+
+    await page.evaluate(async () => {
+      const imgs = Array.from(document.images);
+      await Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(r => { img.onload=r; img.onerror=r; })));
     });
 
-    try {
-        const page = await browser.newPage();
+    const pdf = await page.pdf({
+      format: "A4",
+      printBackground: true,
+      margin: { top: "10mm", bottom: "10mm", left: "10mm", right: "10mm" },
+      timeout: 60000
+    });
 
-        // Set content with longer timeout
-        await page.setContent(html, { waitUntil: 'load', timeout: 120000 }); // 120s
-        await page.evaluateHandle("document.fonts.ready");
-
-        // Wait for images to load
-        await page.evaluate(async () => {
-            const imgs = Array.from(document.images);
-            await Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(r => { img.onload = r; img.onerror = r; })));
-        });
-
-        // Generate PDF
-        const pdf = await page.pdf({
-            format: "A4",
-            printBackground: true,
-            margin: { top: "10mm", bottom: "10mm", left: "10mm", right: "10mm" },
-            timeout: 120000
-        });
-
-        return pdf;
-    } finally {
-        await browser.close();
-    }
+    return pdf;
+  } finally {
+    await browser.close();
+  }
 }
 
 // ---------------- GENERATE PDF ENDPOINT ----------------
 app.post("/generate-pdf", async (req, res) => {
-    try {
-        const pdf = await generatePDFFromHTML("report.html", req.body);
-        res.setHeader("Content-Type", "application/pdf");
-        res.setHeader("Content-Disposition", `attachment; filename="TinyHeartsReport-${req.body.name.replace(/[^a-z0-9]/gi,'_')}.pdf"`);
-        res.end(pdf);
-    } catch (err) {
-        console.error("PDF ERROR:", err);
-        res.status(500).send(`PDF generation failed: ${err.message}`);
-    }
+  try {
+    const pdf = await generatePDFFromHTML("report.html", req.body);
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="TinyHeartsReport-${req.body.name.replace(/[^a-z0-9]/gi,'_')}.pdf"`);
+    res.end(pdf);
+  } catch (err) {
+    console.error("PDF ERROR:", err);
+    res.status(500).send(`PDF generation failed: ${err.message}`);
+  }
 });
-
 
 // ---------------- START SERVER ----------------
 const PORT = process.env.PORT || 10000;
