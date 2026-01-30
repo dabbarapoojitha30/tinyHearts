@@ -3,14 +3,6 @@ const searchInput = document.getElementById('searchId');
 const searchBtn = document.getElementById('searchBtn');
 const resetBtn = document.getElementById('resetBtn');
 
-// ------------------- DATE FORMAT -------------------
-function formatDate(dateStr) {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    if (isNaN(d)) return '';
-    return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
-}
-
 // ------------------- LOAD ALL PATIENTS -------------------
 async function loadPatients() {
     if(!table) return;
@@ -73,7 +65,6 @@ async function generatePDF(id) {
         if(!res.ok) throw new Error("Patient fetch failed");
         const data = await res.json();
 
-        // Do NOT format dates here — server will format
         const pdfRes = await fetch('/generate-pdf', {
             method:'POST',
             headers:{'Content-Type':'application/json'},

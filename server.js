@@ -167,6 +167,20 @@ app.get("/generate-patient-id", async (req, res) => {
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
+// ---------------- PUPPETEER SINGLETON ----------------
+let browserInstance = null;
+async function getBrowser() {
+  if (!browserInstance) {
+    browserInstance = await puppeteer.launch({
+      executablePath: await chromium.executablePath(),
+      headless: true,
+      args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+      defaultViewport: chromium.defaultViewport
+    });
+  }
+  return browserInstance;
+}
+
 // ---------------- PDF GENERATION ----------------
 async function generatePDFFromHTML(fileName, data) {
   const htmlPath = path.join(__dirname, "public", fileName);
@@ -178,42 +192,31 @@ async function generatePDFFromHTML(fileName, data) {
   data.report_date = formatDateForPDF(new Date());
 
   let html = fs.readFileSync(htmlPath, "utf8");
-
-  // Replace placeholders
   for (const key in data) html = html.replace(new RegExp(`{{${key}}}`, "g"), data[key] || "");
 
-  // Launch browser safely
-  const browser = await puppeteer.launch({
-    executablePath: await chromium.executablePath(),
-    headless: true,
-    args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
-    defaultViewport: chromium.defaultViewport
+  const browser = await getBrowser();
+  const page = await browser.newPage();
+
+  await page.setContent(html, { waitUntil: "load", timeout: 60000 });
+  await page.evaluateHandle("document.fonts.ready");
+
+  await page.evaluate(async () => {
+    const imgs = Array.from(document.images);
+    await Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(r => { img.onload=r; img.onerror=r; })));
   });
 
-  try {
-    const page = await browser.newPage();
-    await page.setContent(html, { waitUntil: 'load', timeout: 60000 });
-    await page.evaluateHandle("document.fonts.ready");
+  const pdf = await page.pdf({
+    format: "A4",
+    printBackground: true,
+    margin: { top: "10mm", bottom: "10mm", left: "10mm", right: "10mm" },
+    timeout: 60000
+  });
 
-    await page.evaluate(async () => {
-      const imgs = Array.from(document.images);
-      await Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(r => { img.onload=r; img.onerror=r; })));
-    });
-
-    const pdf = await page.pdf({
-      format: "A4",
-      printBackground: true,
-      margin: { top: "10mm", bottom: "10mm", left: "10mm", right: "10mm" },
-      timeout: 60000
-    });
-
-    return pdf;
-  } finally {
-    await browser.close();
-  }
+  await page.close();
+  return pdf;
 }
 
-// ---------------- GENERATE PDF ENDPOINT ----------------
+// ---------------- PDF ENDPOINT ----------------
 app.post("/generate-pdf", async (req, res) => {
   try {
     const pdf = await generatePDFFromHTML("report.html", req.body);
