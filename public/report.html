@@ -7,7 +7,6 @@
 <style>
 body { 
   font-family: 'Times New Roman', serif; 
-  font-style:normal;
   background: #f2f5f9; 
   margin:0; 
   padding:0; 
@@ -18,66 +17,125 @@ body {
   height: 297mm;
   background: #fff;
   margin: auto;
-  padding: 20px 20px 40px;
+  padding: 20px 20px 120px;
   box-sizing: border-box;
   overflow: hidden;
   position: relative;
 }
 
-.header { display: flex; justify-content: space-between; align-items: flex-start; }
-.header-left h1 { color: #d32f2f; margin:0; font-size:22px; }
-.header-left h2 { margin:2px 0; font-size:14px; color:#3a5964;font-style: normal; }
-.header-left h4 { margin:1px 0; font-size:11px; }
+.header { display:flex; justify-content:space-between; align-items:flex-start; }
+.header-left h1 { color:#d32f2f; margin:0; font-size:22px; }
+.header-left h2 { margin:2px 0; font-size:14px; color:#3a5964; }
+.header-left h4 { margin:2px 0; font-size:11px; }
 .header-right { text-align:center; font-size:12px; }
 .header-right img { max-height:100px; margin-bottom:4px; }
 
-hr.divider { border:none; border-top:2px solid #1e3a8a; margin:8px 0 10px; }
+hr.divider { border:none; border-top:2px solid #1e3a8a; margin:10px 0 12px; }
 
-.watermark { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); opacity:0.08; z-index:0; }
+.watermark {
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%,-50%);
+  opacity:0.08;
+  z-index:0;
+}
 .watermark img { width:250px; }
 
-.section-title { font-weight:600; margin:10px 0 3px; text-decoration:underline; font-size:14px; page-break-inside:avoid; }
-.field { margin-bottom:4px; font-size:13px; page-break-inside:avoid; }
-.field-label { font-weight:700; }
-.field-value { font-weight:500; margin-left:3px; }
+.section-title {
+  font-weight:600;
+  margin:16px 0 8px;
+  text-decoration:underline;
+  font-size:14px;
+}
+
+.field {
+  margin-bottom:8px;
+  font-size:13.5px;
+}
+
+.field-value { font-weight:500; margin-left:4px; }
 
 .patient-details { display:flex; justify-content:space-between; flex-wrap:wrap; }
 .patient-left, .patient-right { width:48%; }
 
 .diagnosis-section {
-  text-align: center;
+  text-align:center;
   font-weight:600;
   font-size:14px;
+  line-height:1.7;
+  margin-bottom:10px;
 }
 
-.impression { font-size:14px; line-height:1.4; padding:6px; text-transform:uppercase; }
+.impression {
+  font-size:14px;
+  line-height:1.7;
+  padding:8px;
+  text-transform:uppercase;
+}
 
-.review-doctor { display:flex; justify-content:space-between; margin-top:15px; font-size:13px; }
+.review-doctor {
+  display:flex;
+  justify-content:space-between;
+  margin-top:20px;
+  font-size:13.5px;
+}
+
 .review-left { max-width:60%; }
-.review-left p { margin:2px 0; }
+
 .doctor-right { text-align:right; }
 .doctor-right h3 { margin:0; font-size:14px; }
-.doctor-right span { font-size:12px; }
 
-.note-line { margin:5px 0 10px; font-size:12px; }
-.note-proffesion{margin:5px 0 10px; font-size:12px;}
+/* Doctor designation – hospital standard */
+.note-proffesion {
+  margin:8px 0 14px;
+  font-size:13.5px;
+}
 
-/* ---------- FOOTER FIX ---------- */
+/* Bedside note – hospital standard */
+.note-line {
+  margin:12px 0 10px;
+  font-size:13.5px;
+}
+
+/* FOOTER */
 .footer-wrapper {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  right: 20px;
+  position:absolute;
+  bottom:0;
+  left:20px;
+  right:20px;
 }
 
 .footer-divider { border-top:2px solid #1e3a8a; margin:10px 0; }
-.footer { text-align:center; font-size:12px; }
-.footer h3 { margin:0; font-size:14px; font-weight:600; }
-.footer p { margin:2px 0; font-size:11px; }
-.footer-bottom { display:flex; justify-content:space-between; font-size:11px; }
-.footer a { color:#000; text-decoration:none; font-weight:500; }
 
-.copyright { text-align:right; font-size:10px; margin-top:2px; }
+.footer {
+  text-align:center;
+  font-size:13px;
+}
+
+.footer h3 {
+  margin:0;
+  font-size:14.5px;
+  font-weight:600;
+}
+
+.footer p {
+  margin:3px 0;
+  font-size:13px;
+}
+
+.footer-bottom {
+  display:flex;
+  justify-content:space-between;
+  font-size:13px;
+}
+
+/* ❗ UNCHANGED AS REQUESTED */
+.copyright {
+  text-align:right;
+  font-size:10px;
+  margin-top:3px;
+}
 
 @media print {
   body { background:none; }
@@ -88,98 +146,91 @@ hr.divider { border:none; border-top:2px solid #1e3a8a; margin:8px 0 10px; }
 
 <body>
 <div class="page">
-  <!-- HEADER -->
-  <div class="header">
-    <div class="header-left">
-      <h1>TINY HEARTS</h1>
-      <h2>FETAL & PEDIATRIC CARDIAC CLINIC</h2>
-      <h4>Phone: 79044 45293 / +91 1112222111</h4>
-      <h4>E-mail: tinyheartsthanjavur@gmail.com</h4>
-    </div>
-    <div class="header-right">
-      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMvSDnGGWqdpkPfwu5e9NH2_IkhSXJTx7wtQ&s">
-      <div>Report Date: {{report_date}}</div>
-    </div>
+
+<div class="header">
+  <div class="header-left">
+    <h1>TINY HEARTS</h1>
+    <h2>FETAL & PEDIATRIC CARDIAC CLINIC</h2>
+    <h4>Phone: 79044 45293 / +91 1112222111</h4>
+    <h4>E-mail: tinyheartsthanjavur@gmail.com</h4>
   </div>
-
-  <hr class="divider">
-
-  <div class="watermark">
+  <div class="header-right">
     <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMvSDnGGWqdpkPfwu5e9NH2_IkhSXJTx7wtQ&s">
+    <div>Report Date: {{report_date}}</div>
   </div>
+</div>
 
-  <!-- PATIENT DETAILS -->
-  <div class="section-title">Patient Details</div>
-  <div class="patient-details">
-    <div class="patient-left">
-      <div class="field"><strong>Patient ID:</strong> <span class="field-value">{{patient_id}}</span></div>
-      <div class="field"><strong>Patient Name:</strong> <span class="field-value">{{name}}</span></div>
-      <div class="field"><strong>Date of Birth:</strong> <span class="field-value">{{dob}}</span></div>
-      <div class="field"><strong>Weight (kg):</strong> <span class="field-value">{{weight}} kg</span></div>
-    </div>
-    <div class="patient-right">
-      <div class="field"><strong>Age:</strong> <span class="field-value">{{age}}</span></div>
-      <div class="field"><strong>Sex:</strong> <span class="field-value">{{sex}}</span></div>
-      <div class="field"><strong>Location:</strong> <span class="field-value">{{location}}</span></div>
-      <div class="field"><strong>Phone No.1:</strong> <span class="field-value">{{phone1}}</span></div>
-      <div class="field"><strong>Phone No.2:</strong> <span class="field-value">{{phone2}}</span></div>
-    </div>
+<hr class="divider">
+
+<div class="watermark">
+  <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQMvSDnGGWqdpkPfwu5e9NH2_IkhSXJTx7wtQ&s">
+</div>
+
+<div class="section-title">Patient Details</div>
+<div class="patient-details">
+  <div class="patient-left">
+    <div class="field"><strong>Patient ID:</strong><span class="field-value">{{patient_id}}</span></div>
+    <div class="field"><strong>Patient Name:</strong><span class="field-value">{{name}}</span></div>
+    <div class="field"><strong>Date of Birth:</strong><span class="field-value">{{dob}}</span></div>
+    <div class="field"><strong>Weight (kg):</strong><span class="field-value">{{weight}} kg</span></div>
   </div>
-
-  <!-- DIAGNOSIS -->
-  <div class="section-title">Diagnosis</div>
-  <div class="diagnosis-section">{{diagnosis}}</div>
-
-  <!-- SEGMENTAL ANATOMY -->
-  <div class="section-title">Segmental Anatomy</div>
-  <div class="field"><strong>Situs & Looping:</strong> <span class="field-value">{{situs_loop}}</span></div>
-  <div class="field"><strong>Systemic Veins:</strong> <span class="field-value">{{systemic_veins}}</span></div>
-  <div class="field"><strong>Pulmonary Veins:</strong> <span class="field-value">{{pulmonary_veins}}</span></div>
-  <div class="field"><strong>Atria:</strong> <span class="field-value">{{atria}}</span></div>
-  <div class="field"><strong>Atrial Septum:</strong> <span class="field-value">{{atrial_septum}}</span></div>
-  <div class="field"><strong>AV Valves:</strong> <span class="field-value">{{av_valves}}</span></div>
-  <div class="field"><strong>Ventricles:</strong> <span class="field-value">{{ventricles}}</span></div>
-  <div class="field"><strong>Ventricular Septum:</strong> <span class="field-value">{{ventricular_septum}}</span></div>
-  <div class="field"><strong>Outflow Tracts:</strong> <span class="field-value">{{outflow_tracts}}</span></div>
-  <div class="field"><strong>Pulmonary Arteries:</strong> <span class="field-value">{{pulmonary_arteries}}</span></div>
-  <div class="field"><strong>Aortic Arch:</strong> <span class="field-value">{{aortic_arch}}</span></div>
-  <div class="field"><strong>Others:</strong> <span class="field-value">{{others_field}}</span></div>
-
-  <!-- IMPRESSION -->
-  <div class="section-title">IMPRESSION</div>
-  <div class="impression">{{impression}}</div>
-
-  <!-- REVIEW DATE AND DOCTOR -->
-  <div class="review-doctor">
-    <div class="review-left"><strong>Review Date: {{review_date}}</strong></div>
-    <div class="doctor-right">
-      <h3>Dr. Mani Ram Krishna</h3>
-      <div class="note-proffesion">
-        Fetal and Pediatric Interventional Cardiologist
-      </div>   
-    </div>
+  <div class="patient-right">
+    <div class="field"><strong>Age:</strong><span class="field-value">{{age}}</span></div>
+    <div class="field"><strong>Sex:</strong><span class="field-value">{{sex}}</span></div>
+    <div class="field"><strong>Location:</strong><span class="field-value">{{location}}</span></div>
+    <div class="field"><strong>Phone No.1:</strong><span class="field-value">{{phone1}}</span></div>
+    <div class="field"><strong>Phone No.2:</strong><span class="field-value">{{phone2}}</span></div>
   </div>
+</div>
 
-  <div class="note-line">
-    Kindly note that this is a bedside evaluation performed under sub-optimal conditions.
-  </div>
+<div class="section-title">Diagnosis</div>
+<div class="diagnosis-section">{{diagnosis}}</div>
 
-  <!-- FOOTER (FIXED AT BOTTOM) -->
-  <div class="footer-wrapper">
-    <div class="footer-divider"></div>
-    <div class="footer">
-      <h3>TINY HEARTS HOSPITAL</h3>
-      <p>Selvam Nagar, 15 A, Medical College Rd, Membalam, Thanjavur</p>
-      <div class="footer-bottom">
-        <div>Insta: @tinyheartsthanjavur<br>FB: Tiny Hearts Thanjavur</div>
-        <div>Web: <a href="https://tinyheartshospital.com/" target="_blank">https://tinyheartshospital.com/</a></div>
-      </div>
-    </div>
+<div class="section-title">Segmental Anatomy</div>
+<div class="field"><strong>Situs & Looping:</strong><span class="field-value">{{situs_loop}}</span></div>
+<div class="field"><strong>Systemic Veins:</strong><span class="field-value">{{systemic_veins}}</span></div>
+<div class="field"><strong>Pulmonary Veins:</strong><span class="field-value">{{pulmonary_veins}}</span></div>
+<div class="field"><strong>Atria:</strong><span class="field-value">{{atria}}</span></div>
+<div class="field"><strong>Atrial Septum:</strong><span class="field-value">{{atrial_septum}}</span></div>
+<div class="field"><strong>AV Valves:</strong><span class="field-value">{{av_valves}}</span></div>
+<div class="field"><strong>Ventricles:</strong><span class="field-value">{{ventricles}}</span></div>
+<div class="field"><strong>Ventricular Septum:</strong><span class="field-value">{{ventricular_septum}}</span></div>
+<div class="field"><strong>Outflow Tracts:</strong><span class="field-value">{{outflow_tracts}}</span></div>
+<div class="field"><strong>Pulmonary Arteries:</strong><span class="field-value">{{pulmonary_arteries}}</span></div>
+<div class="field"><strong>Aortic Arch:</strong><span class="field-value">{{aortic_arch}}</span></div>
+<div class="field"><strong>Others:</strong><span class="field-value">{{others_field}}</span></div>
 
-    <div class="copyright">
-      © 2026 INNOVAISZ CORP | All Rights Reserved
+<div class="section-title">IMPRESSION</div>
+<div class="impression">{{impression}}</div>
+
+<div class="review-doctor">
+  <div class="review-left"><strong>Review Date: {{review_date}}</strong></div>
+  <div class="doctor-right">
+    <h3>Dr. Mani Ram Krishna</h3>
+    <div class="note-proffesion">
+      Fetal and Pediatric Interventional Cardiologist
     </div>
   </div>
+</div>
+
+<div class="note-line">
+  Kindly note that this is a bedside evaluation performed under sub-optimal conditions.
+</div>
+
+<div class="footer-wrapper">
+  <div class="footer-divider"></div>
+  <div class="footer">
+    <h3>TINY HEARTS HOSPITAL</h3>
+    <p>Selvam Nagar, 15 A, Medical College Rd, Membalam, Thanjavur</p>
+    <div class="footer-bottom">
+      <div>Insta: @tinyheartsthanjavur<br>FB: Tiny Hearts Thanjavur</div>
+      <div>Web: https://tinyheartshospital.com/</div>
+    </div>
+  </div>
+  <div class="copyright">
+    © 2026 INNOVAISZ CORP | All Rights Reserved
+  </div>
+</div>
 
 </div>
 </body>

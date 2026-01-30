@@ -170,6 +170,52 @@ form.addEventListener('submit', async e => {
         }
     } catch(err){ alert("Error: " + err.message); }
 });
+// ------------------- SEARCH PATIENT (INDEX PAGE) -------------------
+const searchBtn = document.getElementById("searchBtn");
+const searchInput = document.getElementById("searchId");
+
+if (searchBtn && searchInput) {
+    searchBtn.addEventListener("click", async () => {
+        const id = searchInput.value.trim();
+        if (!id) {
+            alert("Enter Patient ID");
+            return;
+        }
+
+        try {
+            const res = await fetch(`/patients/${id}`);
+            if (!res.ok) throw new Error("Patient not found");
+
+            const data = await res.json();
+
+            // Load data into form (same as edit)
+            patientIdInput.value = data.patient_id;
+            patientIdInput.readOnly = true;
+
+            document.getElementById('name').value = data.name || '';
+            dobInput.value = data.dob ? data.dob.split('T')[0] : '';
+            ageInput.value = data.age || '';
+            document.getElementById('review_date').value =
+                data.review_date ? data.review_date.split('T')[0] : '';
+            document.getElementById('sex').value = data.sex || 'Male';
+            document.getElementById('weight').value = data.weight || '';
+            document.getElementById('phone1').value = data.phone1 || '';
+            document.getElementById('phone2').value = data.phone2 || '';
+            document.getElementById('location').value = data.location || '';
+
+            othersFields.forEach(([selId, taId]) => {
+                setSelectOrOther(selId, taId, data[camelToSnake(selId)] || '');
+            });
+
+            alert("Patient loaded successfully");
+
+        } catch (err) {
+            alert(err.message);
+            console.error(err);
+        }
+    });
+}
+
 
 // ------------------- DOWNLOAD PDF -------------------
 document.getElementById("downloadReport").addEventListener("click", async () => {

@@ -54,13 +54,20 @@ async function deletePatient(id) {
 
     try {
         const res = await fetch(`/patients/${id}`, { method: 'DELETE' });
-        const data = await res.json();
-        alert(data.status || data.error);
-        loadPatients();
+
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(text || "Delete failed");
+        }
+
+        alert("Patient deleted successfully");
+        loadPatients(); // refresh table
     } catch (err) {
-        alert("Error deleting patient: " + err.message);
+        alert("Delete error: " + err.message);
+        console.error(err);
     }
 }
+
 
 // ------------------- GENERATE PDF -------------------
 async function generatePDF(id) {

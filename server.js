@@ -12,7 +12,7 @@ const chromium = require("@sparticuz/chromium");
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, "public"))); // serve static files like logo.png
+app.use(express.static(path.join(__dirname, "public"))); // serve static files
 
 // ---------------- LOCATION CODES ----------------
 const LOCATION_CODES = {
@@ -42,7 +42,7 @@ function formatDateForPDF(dateStr) {
   if (!dateStr) return "";
   const d = new Date(dateStr);
   if (isNaN(d)) return "";
-  return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
+  return `${String(d.getDate()).padStart(2,"0")}/${String(d.getMonth()+1).padStart(2,"0")}/${d.getFullYear()}`;
 }
 
 // ---------------- VALIDATION ----------------
@@ -97,11 +97,12 @@ app.get("/patients", async (_, res) => {
 });
 
 app.get("/patients/:id", async (req, res) => {
-  try {
-    const r = await pool.query("SELECT * FROM patients WHERE patient_id=$1", [req.params.id]);
-    if (!r.rowCount) return res.status(404).json({ error: "Patient not found" });
-    res.json(r.rows[0]);
-  } catch (err) { res.status(500).json({ error: err.message }); }
+  const { id } = req.params;
+  const result = await pool.query("SELECT * FROM patients WHERE patient_id=$1", [id]);
+
+  if (result.rows.length === 0) return res.status(404).json({ error: "Patient not found" });
+
+  res.json(result.rows[0]);
 });
 
 // ---------------- GENERATE PATIENT ID ----------------
@@ -132,28 +133,42 @@ async function generatePDFFromHTML(fileName, data) {
   const htmlPath = path.join(__dirname, "public", fileName);
   if (!fs.existsSync(htmlPath)) throw new Error("HTML template not found");
 
-  if (data.dob) data.dob = formatDateForPDF(data.dob);
-  if (data.review_date) data.review_date = formatDateForPDF(data.review_date);
+  // Format dates
+  data.dob = data.dob ? formatDateForPDF(data.dob) : "";
+  data.review_date = data.review_date ? formatDateForPDF(data.review_date) : "";
   data.report_date = formatDateForPDF(new Date());
 
+  // Load HTML
   let html = fs.readFileSync(htmlPath, "utf8");
+
+  // Replace {{placeholders}} with actual data
   for (const key in data) html = html.replace(new RegExp(`{{${key}}}`, "g"), data[key] || "");
 
-  // Use Render-compatible absolute path for local logo
-  const logoPath = path.join(__dirname, "public", "logo.png").replace(/\\/g, "/");
-  if (fs.existsSync(logoPath)) {
-    html = html.replace(/<img src="logo\.png"\s*\/?>/g, `<img src="file://${logoPath}" />`);
-  }
-
+  // Launch Render-compatible Puppeteer
   const browser = await puppeteer.launch({
     executablePath: await chromium.executablePath(),
     headless: true,
-    args: [...chromium.args, "--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage"],
+    args: [
+      ...chromium.args,
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--disable-dev-shm-usage"
+    ],
     defaultViewport: chromium.defaultViewport
   });
 
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: "networkidle0" });
+
+  // Ensure all external images load
+  await page.evaluate(async () => {
+    const images = Array.from(document.images);
+    await Promise.all(images.map(img => {
+      if (img.complete) return Promise.resolve();
+      return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
+    }));
+  });
+
   await page.evaluateHandle("document.fonts.ready");
 
   const pdf = await page.pdf({
@@ -166,6 +181,7 @@ async function generatePDFFromHTML(fileName, data) {
   return pdf;
 }
 
+// ---------------- PDF ROUTE ----------------
 app.post("/generate-pdf", async (req, res) => {
   try {
     const pdf = await generatePDFFromHTML("report.html", req.body);
