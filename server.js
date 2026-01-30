@@ -89,6 +89,34 @@ app.post("/patients", patientValidationRules, async (req, res) => {
   }
 });
 
+app.patch("/patients/:id", patientValidationRules, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
+
+  const { id } = req.params;
+  const p = req.body;
+  p.age = p.dob ? calculateAge(p.dob) : "";
+
+  const fields = [
+    "name","dob","age","review_date","sex","weight",
+    "phone1","phone2","location","diagnosis","situs_loop",
+    "systemic_veins","pulmonary_veins","atria","atrial_septum",
+    "av_valves","ventricles","ventricular_septum",
+    "outflow_tracts","pulmonary_arteries","aortic_arch",
+    "others_field","impression"
+  ];
+
+  const setQuery = fields.map((f, i) => `${f}=$${i+1}`).join(",");
+  const values = fields.map(f => p[f] || null);
+
+  try {
+    await pool.query(`UPDATE patients SET ${setQuery} WHERE patient_id=$${fields.length+1}`, [...values, id]);
+    res.json({ status: "updated" });
+  } catch(err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 app.get("/patients", async (_, res) => {
   try {
     const r = await pool.query("SELECT patient_id, name, age, location FROM patients ORDER BY created_at DESC");
@@ -98,11 +126,23 @@ app.get("/patients", async (_, res) => {
 
 app.get("/patients/:id", async (req, res) => {
   const { id } = req.params;
-  const result = await pool.query("SELECT * FROM patients WHERE patient_id=$1", [id]);
+  try {
+    const result = await pool.query("SELECT * FROM patients WHERE patient_id=$1", [id]);
+    if (result.rows.length === 0) return res.status(404).json({ error: "Patient not found" });
+    res.json(result.rows[0]);
+  } catch(err){
+    res.status(500).json({ error: err.message });
+  }
+});
 
-  if (result.rows.length === 0) return res.status(404).json({ error: "Patient not found" });
-
-  res.json(result.rows[0]);
+app.delete("/patients/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await pool.query("DELETE FROM patients WHERE patient_id=$1", [id]);
+    res.json({ status: "deleted" });
+  } catch(err){
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // ---------------- GENERATE PATIENT ID ----------------
@@ -133,40 +173,28 @@ async function generatePDFFromHTML(fileName, data) {
   const htmlPath = path.join(__dirname, "public", fileName);
   if (!fs.existsSync(htmlPath)) throw new Error("HTML template not found");
 
-  // Format dates
   data.dob = data.dob ? formatDateForPDF(data.dob) : "";
   data.review_date = data.review_date ? formatDateForPDF(data.review_date) : "";
   data.report_date = formatDateForPDF(new Date());
 
-  // Load HTML
   let html = fs.readFileSync(htmlPath, "utf8");
 
-  // Replace {{placeholders}} with actual data
   for (const key in data) html = html.replace(new RegExp(`{{${key}}}`, "g"), data[key] || "");
 
-  // Launch Render-compatible Puppeteer
   const browser = await puppeteer.launch({
     executablePath: await chromium.executablePath(),
     headless: true,
-    args: [
-      ...chromium.args,
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--disable-dev-shm-usage"
-    ],
+    args: [...chromium.args,"--no-sandbox","--disable-setuid-sandbox","--disable-dev-shm-usage"],
     defaultViewport: chromium.defaultViewport
   });
 
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: "networkidle0" });
 
-  // Ensure all external images load
+  // Wait for images to load
   await page.evaluate(async () => {
-    const images = Array.from(document.images);
-    await Promise.all(images.map(img => {
-      if (img.complete) return Promise.resolve();
-      return new Promise(resolve => { img.onload = resolve; img.onerror = resolve; });
-    }));
+    const imgs = Array.from(document.images);
+    await Promise.all(imgs.map(img => img.complete ? Promise.resolve() : new Promise(r => { img.onload=r; img.onerror=r; })));
   });
 
   await page.evaluateHandle("document.fonts.ready");
@@ -181,7 +209,6 @@ async function generatePDFFromHTML(fileName, data) {
   return pdf;
 }
 
-// ---------------- PDF ROUTE ----------------
 app.post("/generate-pdf", async (req, res) => {
   try {
     const pdf = await generatePDFFromHTML("report.html", req.body);

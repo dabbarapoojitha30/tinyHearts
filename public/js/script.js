@@ -1,10 +1,12 @@
 // ------------------- LIVE DATE -------------------
-document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-GB');
+const currentDateEl = document.getElementById('currentDate');
+if (currentDateEl) currentDateEl.innerText = new Date().toLocaleDateString('en-GB');
 
 // ------------------- DATE FORMAT -------------------
 function formatDate(dateStr) {
     if (!dateStr) return '';
     const d = new Date(dateStr);
+    if (isNaN(d)) return '';
     return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}`;
 }
 
@@ -12,25 +14,27 @@ function formatDate(dateStr) {
 const dobInput = document.getElementById('dob');
 const ageInput = document.getElementById('age');
 
-dobInput.addEventListener('change', () => {
-    const dob = new Date(dobInput.value);
-    const today = new Date();
-    if (isNaN(dob)) { ageInput.value = ''; return; }
+if (dobInput && ageInput) {
+    dobInput.addEventListener('change', () => {
+        const dob = new Date(dobInput.value);
+        const today = new Date();
+        if (isNaN(dob)) { ageInput.value = ''; return; }
 
-    let years = today.getFullYear() - dob.getFullYear();
-    let months = today.getMonth() - dob.getMonth();
-    let days = today.getDate() - dob.getDate();
+        let years = today.getFullYear() - dob.getFullYear();
+        let months = today.getMonth() - dob.getMonth();
+        let days = today.getDate() - dob.getDate();
 
-    if (days < 0) {
-        months--;
-        days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
-    }
-    if (months < 0) {
-        years--;
-        months += 12;
-    }
-    ageInput.value = `${years}y ${months}m ${days}d`;
-});
+        if (days < 0) {
+            months--;
+            days += new Date(today.getFullYear(), today.getMonth(), 0).getDate();
+        }
+        if (months < 0) {
+            years--;
+            months += 12;
+        }
+        ageInput.value = `${years}y ${months}m ${days}d`;
+    });
+}
 
 // ------------------- OTHERS FIELDS -------------------
 const othersFields = [
@@ -88,20 +92,22 @@ const LOCATION_CODES = {
     "Pugazhini Hospital, Trichy":"TRI"
 };
 
-locationSelect.addEventListener('change', async () => {
-    const loc = locationSelect.value;
-    const code = LOCATION_CODES[loc];
-    if(!code){ patientIdInput.value = ''; return; }
+if(locationSelect && patientIdInput){
+    locationSelect.addEventListener('change', async () => {
+        const loc = locationSelect.value;
+        const code = LOCATION_CODES[loc];
+        if(!code){ patientIdInput.value = ''; return; }
 
-    try {
-        const res = await fetch(`/generate-patient-id?location=${encodeURIComponent(loc)}`);
-        const data = await res.json();
-        patientIdInput.value = data.patient_id || code + "1";
-    } catch(err){
-        console.error("Failed to generate patient ID:", err);
-        patientIdInput.value = code + "1";
-    }
-});
+        try {
+            const res = await fetch(`/generate-patient-id?location=${encodeURIComponent(loc)}`);
+            const data = await res.json();
+            patientIdInput.value = data.patient_id || code + "1";
+        } catch(err){
+            console.error("Failed to generate patient ID:", err);
+            patientIdInput.value = code + "1";
+        }
+    });
+}
 
 // ------------------- LOAD PATIENT FOR EDIT -------------------
 const params = new URLSearchParams(window.location.search);
@@ -124,134 +130,93 @@ if(updateId){
             document.getElementById('location').value = data.location || '';
             othersFields.forEach(([selId, taId]) => setSelectOrOther(selId, taId, data[camelToSnake(selId)] || ''));
         })
-        .catch(err => alert("Failed to load patient: " + err));
+        .catch(err => console.error("Failed to load patient:", err));
 }
 
 // ------------------- FORM SUBMIT -------------------
 const form = document.getElementById('echoForm');
-form.addEventListener('submit', async e => {
-    e.preventDefault();
+if(form){
+    form.addEventListener('submit', async e => {
+        e.preventDefault();
 
-    const payload = {
-        patient_id: patientIdInput.value,
-        name: document.getElementById("name").value.trim(),
-        age: ageInput.value,
-        dob: dobInput.value || null,
-        review_date: document.getElementById("review_date")?.value || null,
-        sex: document.getElementById("sex").value,
-        weight: parseFloat(document.getElementById("weight").value) || null,
-        phone1: document.getElementById("phone1").value || null,
-        phone2: document.getElementById("phone2").value || null,
-        location: locationSelect.value || null
-    };
+        const payload = {
+            patient_id: patientIdInput.value,
+            name: document.getElementById("name").value.trim(),
+            age: ageInput.value,
+            dob: dobInput.value || null,
+            review_date: document.getElementById("review_date")?.value || null,
+            sex: document.getElementById("sex").value,
+            weight: parseFloat(document.getElementById("weight").value) || null,
+            phone1: document.getElementById("phone1").value || null,
+            phone2: document.getElementById("phone2").value || null,
+            location: locationSelect.value || null
+        };
 
-    othersFields.forEach(([selId, taId]) => payload[camelToSnake(selId)] = getValue(selId, taId));
+        othersFields.forEach(([selId, taId]) => payload[camelToSnake(selId)] = getValue(selId, taId));
 
-    if(!payload.patient_id || !payload.name){
-        alert("Patient ID and Name are required");
-        return;
-    }
-
-    const method = updateId ? 'PATCH' : 'POST';
-    const url = updateId ? `/patients/${updateId}` : '/patients';
-
-    try{
-        const res = await fetch(url, {
-            method,
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify(payload)
-        });
-        const result = await res.json();
-        if(res.ok){
-            alert(updateId ? "Patient updated" : "Patient saved");
-            window.location.href = 'records.html';
-        } else {
-            alert(result.error || "Failed to save");
-        }
-    } catch(err){ alert("Error: " + err.message); }
-});
-// ------------------- SEARCH PATIENT (INDEX PAGE) -------------------
-const searchBtn = document.getElementById("searchBtn");
-const searchInput = document.getElementById("searchId");
-
-if (searchBtn && searchInput) {
-    searchBtn.addEventListener("click", async () => {
-        const id = searchInput.value.trim();
-        if (!id) {
-            alert("Enter Patient ID");
+        if(!payload.patient_id || !payload.name){
+            alert("Patient ID and Name are required");
             return;
         }
 
-        try {
-            const res = await fetch(`/patients/${id}`);
-            if (!res.ok) throw new Error("Patient not found");
+        const method = updateId ? 'PATCH' : 'POST';
+        const url = updateId ? `/patients/${updateId}` : '/patients';
 
-            const data = await res.json();
-
-            // Load data into form (same as edit)
-            patientIdInput.value = data.patient_id;
-            patientIdInput.readOnly = true;
-
-            document.getElementById('name').value = data.name || '';
-            dobInput.value = data.dob ? data.dob.split('T')[0] : '';
-            ageInput.value = data.age || '';
-            document.getElementById('review_date').value =
-                data.review_date ? data.review_date.split('T')[0] : '';
-            document.getElementById('sex').value = data.sex || 'Male';
-            document.getElementById('weight').value = data.weight || '';
-            document.getElementById('phone1').value = data.phone1 || '';
-            document.getElementById('phone2').value = data.phone2 || '';
-            document.getElementById('location').value = data.location || '';
-
-            othersFields.forEach(([selId, taId]) => {
-                setSelectOrOther(selId, taId, data[camelToSnake(selId)] || '');
+        try{
+            const res = await fetch(url, {
+                method,
+                headers:{'Content-Type':'application/json'},
+                body:JSON.stringify(payload)
             });
-
-            alert("Patient loaded successfully");
-
-        } catch (err) {
-            alert(err.message);
-            console.error(err);
-        }
+            const result = await res.json();
+            if(res.ok){
+                alert(updateId ? "Patient updated" : "Patient saved");
+                window.location.href = 'records.html';
+            } else {
+                alert(result.error || "Failed to save");
+            }
+        } catch(err){ alert("Error: " + err.message); }
     });
 }
 
-
 // ------------------- DOWNLOAD PDF -------------------
-document.getElementById("downloadReport").addEventListener("click", async () => {
-    const payload = {
-        patient_id: patientIdInput.value.trim(),
-        name: document.getElementById("name").value.trim(),
-        age: ageInput.value,
-        dob: dobInput.value || null,
-        review_date: document.getElementById("review_date")?.value || null,
-        sex: document.getElementById("sex").value,
-        weight: parseFloat(document.getElementById("weight").value) || null,
-        phone1: document.getElementById("phone1").value || null,
-        phone2: document.getElementById("phone2").value || null,
-        location: locationSelect.value || null
-    };
-    othersFields.forEach(([selId, taId]) => payload[camelToSnake(selId)] = getValue(selId, taId));
+const downloadBtn = document.getElementById("downloadReport");
+if(downloadBtn){
+    downloadBtn.addEventListener("click", async () => {
+        const payload = {
+            patient_id: patientIdInput.value.trim(),
+            name: document.getElementById("name").value.trim(),
+            age: ageInput.value,
+            dob: dobInput.value || null,
+            review_date: document.getElementById("review_date")?.value || null,
+            sex: document.getElementById("sex").value,
+            weight: parseFloat(document.getElementById("weight").value) || null,
+            phone1: document.getElementById("phone1").value || null,
+            phone2: document.getElementById("phone2").value || null,
+            location: locationSelect.value || null
+        };
+        othersFields.forEach(([selId, taId]) => payload[camelToSnake(selId)] = getValue(selId, taId));
 
-    if(!payload.name || !payload.patient_id){ alert("Patient ID and Name required"); return; }
+        if(!payload.name || !payload.patient_id){ alert("Patient ID and Name required"); return; }
 
-    try{
-        const res = await fetch("/generate-pdf", {
-            method:"POST",
-            headers:{"Content-Type":"application/json"},
-            body:JSON.stringify(payload)
-        });
+        try{
+            const res = await fetch("/generate-pdf", {
+                method:"POST",
+                headers:{"Content-Type":"application/json"},
+                body:JSON.stringify(payload)
+            });
 
-        if(!res.ok) throw new Error(await res.text());
+            if(!res.ok) throw new Error(await res.text());
 
-        const blob = await res.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `TinyHeartsReport-${payload.name.replace(/[^a-z0-9]/gi,'_')}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-    } catch(err){ alert("PDF failed: "+err.message); }
-});
+            const blob = await res.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `TinyHeartsReport-${payload.name.replace(/[^a-z0-9]/gi,'_')}.pdf`;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch(err){ alert("PDF failed: "+err.message); }
+    });
+}
